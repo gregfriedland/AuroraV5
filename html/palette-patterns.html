@@ -2,18 +2,22 @@
 <html>
 <head>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
+<script src="http://js.leapmotion.com/leap-0.6.2.js"></script>
 <script src="kuler.js"></script>
+<script src="palette.js"></script>
+<script src="leds.js"></script>
+<script src="patterns.js"></script>
 </head>
 
 <body>
 <div id="connectionStatus"></div>
-<canvas id="myCanvas" width="1024" height="1000"></canvas>
+<div id="leap"></div>
+<div id="palettes"></div>
 <script type="text/javascript">
 
 var numColors = 1024;
 var numLeds = 104;
-
-
 
 
 function getWaitTime(val, min, max) {
@@ -23,134 +27,11 @@ function getWaitTime(val, min, max) {
 }
 
 
-
-function Palette(index, baseColors, numColors) {
-  this.index = index;
-  this.baseColors = baseColors;
-  this.rgbs = this.getGradient(baseColors, numColors);
-  this.numColors = numColors;
-}
-
-Palette.prototype.getGradient = function(colors, length) {
-  var canvas = document.createElement('canvas');
-  canvas.width = length;
-  canvas.height = 1;
-  var context = canvas.getContext('2d');
-
-  var gradient = context.createLinearGradient(0, 0, length, 1);
-  for (var i=0; i<colors.length; i++) {
-    gradient.addColorStop(i/colors.length, "#" + colors[i]);
-  }
-  gradient.addColorStop(1.0, "#" + colors[0]);
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, length, 1);  
-  var imageData = context.getImageData(0, 0, length, 1).data;
-  var rgbs = [];
-  for (var i=0; i<length; i++) {
-    rgbs.push([imageData[i*4], imageData[i*4+1], imageData[i*4+2]]);
-  }
-  return rgbs;
-}
-
-
-
-function PaletteManager(allBaseColors, numColors) {
-  this.numColors = numColors;
-  this.palettes = [];
-  for (var i=0; i<allBaseColors.length; i++) {
-    this.palettes.push(new Palette(i, allBaseColors[i], numColors));
-  }
-  this.currPalette = Math.floor(Math.random() * allBaseColors.length);
-}
-
-PaletteManager.prototype.getCurrent = function() {
-  return this.palettes[this.currPalette];
-}
-
-PaletteManager.prototype.setCurrentIndex = function(i) {
-  this.currPalette = i % this.palettes.length;
-}
-
-
-
-// Set all pixels to a given color
-function updateLEDs(socket, leds) {
-  var packet = new Uint8ClampedArray(4 + leds.length * 3);
-
-  if (socket.readyState != 1 /* OPEN */) {
-      console.log("Fadecandy server not open");
-      // The server connection isn't open. Nothing to do.
-      return;
-  }
-
-  if (socket.bufferedAmount > packet.length) {
-      console.log("Fadecandy server connection problems");
-      // The network is lagging, and we still haven't sent the previous frame.
-      // Don't flood the network, it will just make us laggy.
-      // If fcserver is running on the same computer, it should always be able
-      // to keep up with the frames we send, so we shouldn't reach this point.
-      return;
-  }
-
-  // Sample the center pixel of each LED
-  var dest = 4; // Dest position in our packet. Start right after the header.
-  for (var i = 0; i < leds.length; i++) {
-      packet[dest++] = leds[i][0];
-      packet[dest++] = leds[i][1];
-      packet[dest++] = leds[i][2];
-  }
-  socket.send(packet.buffer);
-}
-
-
-
-function Animator(numLeds, allBaseColors, numColors, updateLEDsFunc) {
-  this.leds = [];
-  for (var i=0; i<numLeds; i++) {
-    this.leds.push([0,0,0]);
-  }
-  
-  this.paletteMgr = new PaletteManager(allBaseColors, numColors);
-  this.updateLEDsFunc = updateLEDsFunc;
-}
-
-Animator.prototype.run = function(func, config, state) {
-  var newState = func(this.leds, this.updateLEDsFunc, this.paletteMgr.getCurrent(), config, state);
-  
-  var anim = this;
-  setTimeout(function() { anim.run(func, config, newState); },
-             newState.delay);
-}
-
-//// draw gradients to a canvas
-//var canvas = document.getElementById('myCanvas');
-//var context = canvas.getContext('2d');
-//  
-//for (var i = 0; i < paletteMgr.palettes.length; i++) {
-//  var rgbs = paletteMgr.palettes[i].rgbs;
-//  for (var j=0; j < rgbs.length; j++) {
-//    context.fillStyle = 'rgb(' + rgbs[j][0] + ',' + rgbs[j][1] + ',' + rgbs[j][2] + ')';
-//    context.fillRect(j, i*10, 1, 10);
-//  }
-//}
-
-
-
-function RotateGradient(leds, updateLEDsFunc, palette, config, state) {
-  for (var l=0; l<leds.length; l++) {
-    var rgb = palette.rgbs[Math.floor(((state.t + l) % leds.length) * palette.numColors / leds.length)];
-    leds[l] = rgb;
-  }
-
-  updateLEDsFunc(leds);
-  
-  state.t = (state.t + 1) % leds.length;
-  state.delay = 1000/getWaitTime(config.wait, config.waitRange[0], config.waitRange[1]);
-  return state;
-}
-
-
+Leap.loop(function(frame) {
+  var pos = frame.pointables[0].tipPosition;
+  var leapTxt = document.getElementById("leap");
+  leapTxt.text(pos);
+});
 
 // Connect to a Fadecandy server running on the same computer, on the default port
 // Put some connection status text in the corner of the screen
@@ -162,8 +43,11 @@ socket.onclose = function(event) {
 socket.onopen = function(event) {
     $('#connectionStatus').text('Connected');
     
-    var anim = new Animator(numLeds, allBaseColors, numColors,
-                                 function(leds) { updateLEDs(socket, leds); });
+    paletteMgr = new PaletteManager(allBaseColors, numColors);
+    drawPalettes(paletteMgr, null, 256, 3000);
+
+    var anim = new Animator(numLeds, paletteMgr,
+                            function(leds) { updateLEDs(socket, leds); });
     anim.run(RotateGradient, { waitRange:[5,50], wait:70 }, { t:0 });
 }
 
