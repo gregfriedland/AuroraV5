@@ -18,7 +18,7 @@
 
 var numColors = 1024;
 var numLeds = 104;
-
+var leapUpdateInterval = 100;
 
 function getWaitTime(val, min, max) {
   var expBase = Math.pow(Math.pow(10, Math.log(max-min)), 1/255.0);
@@ -27,14 +27,9 @@ function getWaitTime(val, min, max) {
 }
 
 
-Leap.loop(function(frame) {
-  var pos = frame.pointables[0].tipPosition;
-  var leapTxt = document.getElementById("leap");
-  leapTxt.text(pos);
-});
-
 // Connect to a Fadecandy server running on the same computer, on the default port
 // Put some connection status text in the corner of the screen
+var anim;
 var socket = new WebSocket('ws://10.0.1.77:7890');
 $('#connectionStatus').text('Connecting to fcserver...');
 socket.onclose = function(event) {
@@ -46,11 +41,37 @@ socket.onopen = function(event) {
     paletteMgr = new PaletteManager(allBaseColors, numColors);
     drawPalettes(paletteMgr, null, 256, 3000);
 
-    var anim = new Animator(numLeds, paletteMgr,
-                            function(leds) { updateLEDs(socket, leds); });
-    anim.run(RotateGradient, { waitRange:[5,50], wait:70 }, { t:0 });
+    anim = new Animator(numLeds, paletteMgr, 200,
+                            function(leds) { updateLEDs(socket, leds); },
+                            drawGradient,
+                            makeIndexIncrementFunc(1, numLeds));
+    anim.run();
 }
 
+var lastLeapUpdate = new Date().getTime();
+Leap.loop({}, function(frame) {
+  var currTime = new Date().getTime();
+  if (currTime - lastLeapUpdate < leapUpdateInterval) {
+    return;
+  }
+  
+  lastLeapUpdate = currTime;
+  
+  var frameString = "Hands: " + frame.hands.length + "<br />"
+                + "Fingers: " + frame.fingers.length + "<br />"
+                + "Tools: " + frame.tools.length + "<br />"
+                + "Gestures: " + frame.gestures.length + "<br />";
+  if (frame.fingers.length > 0) {
+    var indexIncr = Math.floor(frame.fingers[0].tipPosition[0] / 10);
+    anim.updateIndexFunc = makeIndexIncrementFunc(indexIncr, numLeds);
+
+    frameString += "Finger1: " + frame.fingers[0].tipPosition + "<br/>"
+                 + "IndexIncr: " + indexIncr;
+  }
+        
+  var leapTxt = document.getElementById('leap');
+  leapTxt.innerHTML = frameString;
+});
 
 
 </script>
