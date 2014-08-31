@@ -3,7 +3,8 @@
 <head>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
-<script src="http://js.leapmotion.com/leap-0.6.2.js"></script>
+<!--<script src="http://js.leapmotion.com/leap-0.6.2.js"></script>-->
+<script type="text/javascript" src="http://js.leapmotion.com/0.2.0-beta1/leap.min.js"></script>
 <script src="kuler.js"></script>
 <script src="palette.js"></script>
 <script src="leds.js"></script>
@@ -41,15 +42,29 @@ socket.onopen = function(event) {
     paletteMgr = new PaletteManager(allBaseColors, numColors);
     drawPalettes(paletteMgr, null, 256, 3000);
 
-    anim = new Animator(numLeds, paletteMgr, 200,
-                            function(leds) { updateLEDs(socket, leds); },
-                            drawGradient,
-                            makeIndexIncrementFunc(1, numLeds));
+    // gradient transition
+    anim = new Animator(numLeds, paletteMgr,
+                        function(leds) { updateLEDs(socket, leds); },
+                        drawGradient,
+                        {index: 0}, {delay: 20, incr: 1});
+
+//    anim = new Animator(numLeds, paletteMgr,
+//                        function(leds) { updateLEDs(socket, leds); },
+//                        drawWipe,
+//                        {index: 0}, {delay: 20, incr: 1});
+
+//    anim = new Animator(numLeds, paletteMgr,
+//                        function(leds) { updateLEDs(socket, leds); },
+//                        drawPulse,
+//                        {colorIndex: 0, pulseIndex: 0},
+//                        {delay: 20, colorIncr: 5});
+
     anim.run();
 }
 
 var lastLeapUpdate = new Date().getTime();
-Leap.loop({}, function(frame) {
+Leap.loop(function(frame) {
+//Leap.loop({}, function(frame) {
   var currTime = new Date().getTime();
   if (currTime - lastLeapUpdate < leapUpdateInterval) {
     return;
@@ -62,8 +77,9 @@ Leap.loop({}, function(frame) {
                 + "Tools: " + frame.tools.length + "<br />"
                 + "Gestures: " + frame.gestures.length + "<br />";
   if (frame.fingers.length > 0) {
-    var indexIncr = Math.floor(frame.fingers[0].tipPosition[0] / 10);
-    anim.updateIndexFunc = makeIndexIncrementFunc(indexIncr, numLeds);
+    var indexIncr = Math.floor(frame.fingers[0].tipPosition[0] / 20);
+    //anim.updateIndexFunc = makeIndexIncrementFunc(indexIncr, numLeds);
+    anim.config.incr = indexIncr;
 
     frameString += "Finger1: " + frame.fingers[0].tipPosition + "<br/>"
                  + "IndexIncr: " + indexIncr;
