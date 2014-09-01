@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <title>Aurora Controller</title>
+
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.css">
+
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" charset="utf-8" src="aurora.js"></script>
+</head>
+
+<body>
+  <div data-role="page">
+    <div data-role="header">
+        <h1>Aurora controller</h1>
+    </div><!-- /header -->
+
+    <div data-role="content" class="content">
+      <form>
+      <div>
+        <h2>Program</h2>
+        <ul data-role="listview" data-inset="true">
+          <li class="ui-body ui-body-b">
+            <fieldset class="ui-grid-a my-breakpoint">
+              <div id="programs">
+              </div>
+            </fieldset>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Settings</h2>
+        <ul data-role="listview" data-inset="true">
+          <li class="ui-body ui-body-c">
+            <fieldset class="ui-grid-a my-breakpoint">
+              <div id="settings">
+              </div>
+            </fieldset>
+          </li>
+        </ul>
+        </div>
+      </div>
+    </form>
+
+    </div><!-- /content -->
+
+    <div data-role="footer">
+    </div><!-- /footer -->
+ 
+  </div><!-- /page -->
+</body>
+
+</html>
