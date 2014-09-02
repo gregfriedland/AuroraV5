@@ -1,16 +1,31 @@
 
+function LEDs(length, socket) {
+  this.length = length;
+  this.socket = socket;
+  this.clear();
+}
 
-// Set all pixels to a given color
-function updateLEDs(socket, leds) {
-  var packet = new Uint8ClampedArray(4 + leds.length * 3);
+LEDs.prototype.setAll = function(rgb) {
+  this.rgbs = [];
+  for (var i=0; i<this.length; i++) {
+    this.rgbs.push(rgb);
+  }
+}
 
-  if (socket.readyState != 1 /* OPEN */) {
+LEDs.prototype.clear = function() {
+  this.setAll([0,0,0]);
+}
+
+LEDs.prototype.update = function() {
+  var packet = new Uint8ClampedArray(4 + this.rgbs.length * 3);
+
+  if (this.socket.readyState != 1 /* OPEN */) {
       console.log("Fadecandy server not open");
       // The server connection isn't open. Nothing to do.
       return;
   }
 
-  if (socket.bufferedAmount > packet.length) {
+  if (this.socket.bufferedAmount > packet.length) {
       console.log("Fadecandy server connection problems");
       // The network is lagging, and we still haven't sent the previous frame.
       // Don't flood the network, it will just make us laggy.
@@ -21,13 +36,13 @@ function updateLEDs(socket, leds) {
 
   // Sample the center pixel of each LED
   var dest = 4; // Dest position in our packet. Start right after the header.
-  for (var i = 0; i < leds.length; i++) {
-      packet[dest++] = leds[i][0];
-      packet[dest++] = leds[i][1];
-      packet[dest++] = leds[i][2];
+  for (var i = 0; i < this.rgbs.length; i++) {
+      packet[dest++] = this.rgbs[i][0];
+      packet[dest++] = this.rgbs[i][1];
+      packet[dest++] = this.rgbs[i][2];
   }
-  socket.send(packet.buffer);
+  this.socket.send(packet.buffer);
 }
 
 
-module.exports.update = updateLEDs;
+module.exports.LEDs = LEDs;

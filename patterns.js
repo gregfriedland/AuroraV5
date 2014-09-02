@@ -4,62 +4,40 @@ function mod(m, n) {
 
 
 
-function Animator(numLeds, paletteMgr, updateLEDsFunc,
-                  pattern, state, config) {
-  this.numLeds = numLeds;
-  this.clear();
-  
-  this.updateLEDsFunc = updateLEDsFunc;
+function Animator(leds, paletteMgr, drawer) {
+  this.leds = leds;
   this.paletteMgr = paletteMgr;
-  this.pattern = pattern;
-  this.state = state;
-  this.config = config;
-}
-
-Animator.prototype.setAll = function(rgb) {
-  this.leds = [];
-  for (var i=0; i<this.numLeds; i++) {
-    this.leds.push(rgb);
-  }
-}
-
-Animator.prototype.clear = function() {
-  this.setAll([0,0,0]);
+  this.drawer = drawer;
 }
 
 Animator.prototype.run = function() {
-  var drawFunc;
-  if (this.pattern == "Gradient") {
-    drawFunc = drawGradient;
-  } else if (this.pattern == "Wave") {
-    drawFunc = drawWave;
-  } else if (this.pattern == "Pulse") {
-    drawFunc = drawPulse;
-  } else if (this.pattern == "Wipe") {
-    drawFunc = drawWipe;
-  } else {
-    drawFunc = null;
-  }
-
-  if (drawFunc != null) {
-    this.state = drawFunc(this.leds, this.paletteMgr.getCurrent(), this.state, this.config);
-    this.updateLEDsFunc(this.leds);
-  }
+  this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
+  this.leds.update()
   
   var anim = this;
-  setTimeout(function() { anim.run(); }, this.config.delay);
+  setTimeout(function() { anim.run(); }, this.drawer.getDelay());
 }
 
 
 
-function drawGradient(leds, palette, state, config) {
+function GradientDrawer() {
+  this.name = "Gradient";
+  this.index = 0;
+  this.values = {speed: 20};
+  this.ranges = {speed: [0,100]};
+}
+
+GradientDrawer.prototype.draw = function(leds, palette) {
   for (var l=0; l<leds.length; l++) {
-    var rgb = palette.rgbs[Math.floor(((state.index + l) % leds.length) * palette.numColors / leds.length)];
-    leds[l] = rgb;
+    var rgb = palette.rgbs[Math.floor(((this.index + l) % leds.length) * palette.numColors / leds.length)];
+    leds.rgbs[l] = rgb;
   }
   
-  state.index = mod(state.index + config.incr, leds.length);
-  return state;
+  this.index = mod(this.index + 1, leds.length);
+}
+
+GradientDrawer.prototype.getDelay = function() {
+  return 1000/this.values.speed;
 }
 
 
@@ -67,63 +45,93 @@ function drawGradient(leds, palette, state, config) {
 // wipe a color from one side to the next
 // possible config: random order, forward/reverse, point/swipe, palette incr
 //                  delay between leds and after all leds
-function drawWipe(leds, palette, state, config) {
-  if ((state.ledIndex == 0 && config.incr > 0) ||
-      (state.ledIndex == leds.length-1 && config.incr < 0 )) {
-    this.clear();
+function WipeDrawer() {
+  this.name = "Wipe";
+  this.index = 0;
+  this.values = {speed: 20};
+  this.ranges = {speed: [0,100]};
+}
+
+WipeDrawer.prototype.draw = function(leds, palette) {
+  if (this.index == 0) {
+    leds.clear();
   }
 
-  var rgb = palette.rgbs[Math.floor(state.ledIndex * palette.numColors / leds.length)];
-  leds[l] = rgb;
+  var rgb = palette.rgbs[Math.floor(this.index * palette.numColors / leds.length)];
+  leds.rgbs[this.indexd] = rgb;
   
-  state.ledIndex = mod(state.ledIndex + config.incr, leds.length);
-  return state;
+  this.index = mod(this.index + 1, leds.length);
+}
+
+WipeDrawer.prototype.getDelay = function() {
+  return 1000/this.values.speed;
 }
 
 
-var maxPulseVal = 256;
-var pulseTable = [255,248,242,236,229,223,217,211,205,200,194,188,183,177,172,167,162,157,152,147,142,137,132,128,123,119,114,110,106,102,98,94,90,86,82,79,75,72,68,65,62,59,55,52,50,47,44,41,39,36,34,32,29,27,25,23,21,19,18,16,14,13,11,10,9,8,6,5,4,4,3,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,5,7,10,12,15,19,22,26,31,35,40,46,51,57,63,70,77,84,91,99,107,116,124,134,143,153,163,173,184,195,206,218,230,242];
 
-function drawPulse(leds, palette, state, config) {
-  var rgb = palette.rgbs[state.colorIndex];
 
-  var pulseVal = pulseTable[state.pulseIndex]/maxPulseVal;
+function PulseDrawer() {
+  this.name = "Pulse";
+  this.colorIndex = 0;
+  this.pulseIndex = 0;
+  this.values = {pulseSpeed: 20, colorSpeed: 3};
+  this.ranges = {pulseSpeed: [0,100], colorSpeed: [0,10]};
+  this.maxPulseVal = 256;
+  this.pulseTable = [255,248,242,236,229,223,217,211,205,200,194,188,183,177,172,167,162,157,152,147,142,137,132,128,123,119,114,110,106,102,98,94,90,86,82,79,75,72,68,65,62,59,55,52,50,47,44,41,39,36,34,32,29,27,25,23,21,19,18,16,14,13,11,10,9,8,6,5,4,4,3,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,5,7,10,12,15,19,22,26,31,35,40,46,51,57,63,70,77,84,91,99,107,116,124,134,143,153,163,173,184,195,206,218,230,242];
+}
+
+PulseDrawer.prototype.draw = function(leds, palette) {
+  var rgb = palette.rgbs[this.colorIndex];
+
+  var pulseVal = this.pulseTable[this.pulseIndex]/this.maxPulseVal;
   var pulsedRgb = [Math.floor(rgb[0]*pulseVal),
                    Math.floor(rgb[1]*pulseVal),
                    Math.floor(rgb[2]*pulseVal)];
   
   for (var l=0; l<leds.length; l++) {
-    leds[l] = pulsedRgb;
+    leds.rgbs[l] = pulsedRgb;
   }
   
-  state.pulseIndex = mod(state.pulseIndex+1, pulseTable.length);
-  if (state.pulseIndex == 0) {
-    state.colorIndex = mod(state.colorIndex+config.colorIncr, palette.numColors);
+  this.pulseIndex = mod(this.pulseIndex+1, this.pulseTable.length);
+  if (this.pulseIndex == 0) {
+    this.colorIndex = mod(this.colorIndex+this.values.colorSpeed, palette.numColors);
   }
-  return state;
+}
+
+PulseDrawer.prototype.getDelay = function() {
+  return 1000/this.values.pulseSpeed;
 }
 
 
 
-var maxWaveVal = 100;
-var waveTable = [0,1,4,9,16,25,36,49,64,81,100,121,144,169,196,225,196,169,144,121,100,81,64,49,36,25,16,9,4,1,0,0];
+function WaveDrawer() {
+  this.name = "Wave";
+  this.index = 0;
+  this.values = {waveSpeed: 20, colorSpeed: 3};
+  this.ranges = {waveSpeed: [0,100], colorSpeed: [0,10]};
+  this.maxWaveVal = 100;
+  this.waveTable = [0,1,4,9,16,25,36,49,64,81,100,121,144,169,196,225,196,169,144,121,100,81,64,49,36,25,16,9,4,1,0,0];
+}
 
-function drawWave(leds, palette, state, config) {
+
+WaveDrawer.prototype.draw = function(leds, palette) {
   for (var l=0; l<leds.length; l++) {
-    var waveIndex = (state.startIndex + l) % waveTable.length;
-    var waveVal = waveTable[waveIndex]/maxWaveVal;
+    var waveIndex = (this.index + l) % this.waveTable.length;
+    var waveVal = this.waveTable[waveIndex]/this.maxWaveVal;
 
-    var rgb = palette.rgbs[Math.floor(state.startIndex * palette.numColors / leds.length)];
+    var rgb = palette.rgbs[Math.floor(this.index * palette.numColors / leds.length)];
     var waveRgb = [Math.floor(rgb[0]*waveVal),
                    Math.floor(rgb[1]*waveVal),
                    Math.floor(rgb[2]*waveVal)];
     
-    leds[l] = waveRgb;
+    leds.rgbs[l] = waveRgb;
   }
   
-  state.startIndex = mod(state.startIndex + 1, leds.length);
-  return state;
+  this.index = mod(this.index + this.values.colorSpeed, leds.length);
+}
 
+WaveDrawer.prototype.getDelay = function() {
+  return 1000/this.values.waveSpeed;
 }
 
 
@@ -133,4 +141,8 @@ function drawSparkle(leds, palette, state, config) {
 
 
 module.exports.Animator = Animator;
+module.exports.GradientDrawer = GradientDrawer;
+module.exports.WipeDrawer = WipeDrawer;
+module.exports.WaveDrawer = WaveDrawer;
+module.exports.PulseDrawer = PulseDrawer;
 
