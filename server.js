@@ -43,10 +43,10 @@ http.listen(8080, function(){
 
 //// Start the websockets connection to the fadecandy server ////
 var fcSocket = new WebSocket('ws://localhost:7890');
-fcSocket.onclose = function(event) {
+fcSocket.on('close', function(event) {
   console.log('Unable to connect to fcserver');
-}
-fcSocket.onopen = function(event) {
+});
+fcSocket.on('open', function(msg) {
   console.log('Connected to fcserver');
   
   paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
@@ -68,8 +68,9 @@ fcSocket.onopen = function(event) {
 //                        {colorIndex: 0, pulseIndex: 0},
 //                        {delay: 20, colorIncr: 5});
 
+    console.log('starting patterns');
     animator.run();
-}
+});
 
 
 
