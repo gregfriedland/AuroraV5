@@ -1,3 +1,36 @@
+function hexToRgb(hex) {
+  var bigint = parseInt(hex, 16);
+  var r = (bigint >> 16) & 255;
+  var g = (bigint >> 8) & 255;
+  var b = bigint & 255;
+
+  return [r,g,b];
+}
+
+function interp(val, fromMax, toMin, toMax) {
+  if (val >= fromMax) return toMax;
+  return toMin + val*(toMax-toMin)/fromMax;
+}
+
+function getGradientColor(colors, gradientIndex, gradientSize) {
+  var hex1 = Math.floor(gradientIndex * colors.length / gradientSize);
+  var hex2 = (hex1 + 1) % colors.length;
+
+  var rgb1 = hexToRgb(hex1);
+  var rgb2 = hexToRgb(hex2);
+
+  var subGradientSize = Math.floor(gradientSize / colors.length);
+  gradientIndex = gradientIndex % subGradientSize;
+
+  var rgb = [Math.floor(rgb1[0] + gradientIndex * (rgb2[0] - rgb1[0]) / subGradientSize),
+             Math.floor(rgb1[1] + gradientIndex * (rgb2[1] - rgb1[1]) / subGradientSize),
+             Math.floor(rgb1[2] + gradientIndex * (rgb2[2] - rgb1[2]) / subGradientSize)];
+  
+  // look up gamma
+
+  return rgb;
+}
+
 
 function Palette(index, baseColors, numColors) {
   this.index = index;
@@ -7,23 +40,10 @@ function Palette(index, baseColors, numColors) {
 }
 
 Palette.prototype.getGradient = function(colors, length) {
-  var canvas = document.createElement('canvas');
-  canvas.width = length;
-  canvas.height = 1;
-  var context = canvas.getContext('2d');
-
-  var gradient = context.createLinearGradient(0, 0, length, 1);
-  for (var i=0; i<colors.length; i++) {
-    gradient.addColorStop(i/colors.length, "#" + colors[i]);
-  }
-  gradient.addColorStop(1.0, "#" + colors[0]);
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, length, 1);  
-  var imageData = context.getImageData(0, 0, length, 1).data;
   var rgbs = [];
   for (var i=0; i<length; i++) {
-    rgbs.push([imageData[i*4], imageData[i*4+1], imageData[i*4+2]]);
+    var rgb = getGradientColor(colors, i, length);
+    rgbs.push(rgb);
   }
   return rgbs;
 }
@@ -64,28 +84,21 @@ function drawPalettes(paletteMgr, clickCallback, width, height) {
 
   // another layer for the outlines of the palettes
   var layer2 = new Kinetic.Layer();
-  //var text = new Kinetic.Text({ x: 10, y: 10, fill: 'black', text: 'test' });
-  //layer2.add(text);
 
   var context = layer1.getContext()._context;
   console.log(context);
   
   var onmouseover = function(palRect, i) {
     return function() {
-      //text.setText('mouseover ' + i);
-      //palRect.strokeWidth(4);
       palRect.stroke('black');
       layer2.draw();
-      //console.log(i);
     }
   }
   
   var onmouseout = function(palRect, i) {
     return function() {
-      //text.setText('mouseover ' + i);
       palRect.stroke(null);
       layer2.draw();
-      //console.log(i);
     }
   }
 
@@ -104,33 +117,8 @@ function drawPalettes(paletteMgr, clickCallback, width, height) {
   }
   
   stage.add(layer2);
-  
-//  // add the click callback
-//  canvasE.addEventListener("click",
-//                           function(e) {
-//                             return canvasOnClick(e, canvas, clickCallback, paletteMgr.palettes.length);
-//                           }, false);
-//
 }
-//
-//function canvasOnClick(e, canvas, clickCallback, numPalettes) {
-//    var offsetX = 0, offsetY = 0
-//
-//    if (canvas.offsetParent) {
-//      do {
-//        offsetX += canvas.offsetLeft;
-//        offsetY += canvas.offsetTop;
-//      } while ((canvas = canvas.offsetParent));
-//    }
-//
-//    x = e.pageX - offsetX;
-//    y = e.pageY - offsetY;
-//  
-//    var paletteIndex = Math.floor(canvas.height / numPalettes);
-//  
-//    clickCallback
-//  
-//}
-//
-//
-//
+
+
+module.exports.PaletteManager = PaletteManager;
+module.exports.drawPalettes = drawPalettes;

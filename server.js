@@ -1,19 +1,79 @@
+//// Node.js server ////
+
+
+//// Server config variables ////
+var numColors = 1024;
+var numLeds = 104;
+//var leapUpdateInterval = 100;
+
+
+//// Global variables ////
+var currProgram = null;
+var settings = {Gradient: {values: {speed:10,      colorCycling:20},
+                           ranges: {speed:[0,100], colorCycling:[0,100]}}};
+var animator;
+
+
+var patterns = require('./patterns.js');
+var leds = require('./leds.js');
+var palette = require('./palette.js');
+var allBaseColors = require('./kuler.js').allBaseColors;
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var socketIO = require('socket.io');
+var io = socketIO(http);
 var path = require('path');
+var WebSocket = require('ws');
 
+
+//// Start the http server ///
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.use(express.static('public'));
 
-var currProgram = null;
-var settings = {Gradient: {values: {speed:10,      colorCycling:20},
-                           ranges: {speed:[0,100], colorCycling:[0,100]}}};
+http.listen(8080, function(){
+  console.log('listening on *:8080');
+});
 
+
+
+//// Start the websockets connection to the fadecandy server ////
+var fcSocket = new WebSocket('ws://localhost:7890');
+fcSocket.onclose = function(event) {
+  console.log('Unable to connect to fcserver');
+}
+fcSocket.onopen = function(event) {
+  console.log('Connected to fcserver');
+  
+  paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
+
+  // gradient transition
+  animator = new patterns.Animator(numLeds, paletteMgr,
+                      function(ledData) { leds.update(fcSocket, ledData); },
+                      "Gradient",
+                      {index: 0}, {delay: 20, incr: 1});
+
+//    anim = new Animator(numLeds, paletteMgr,
+//                        function(leds) { updateLEDs(socket, leds); },
+//                        drawWipe,
+//                        {index: 0}, {delay: 20, incr: 1});
+
+//    anim = new Animator(numLeds, paletteMgr,
+//                        function(leds) { updateLEDs(socket, leds); },
+//                        drawPulse,
+//                        {colorIndex: 0, pulseIndex: 0},
+//                        {delay: 20, colorIncr: 5});
+
+    animator.run();
+}
+
+
+
+//// Handle the websockets connection to the client ////
 io.sockets.on('connection', function (socket) {
   // get the allowed programs
   socket.on('get programs', function (data, fn) {
@@ -41,8 +101,4 @@ io.sockets.on('connection', function (socket) {
     //randomizeSettings();
     fn(settings[currProgram].values);
   });
-});
-
-http.listen(8080, function(){
-  console.log('listening on *:8080');
 });

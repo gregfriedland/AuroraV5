@@ -1,4 +1,4 @@
-var allBaseColors =
+module.exports.allBaseColors =
 [["FF0000", "00FF00", "0000FF", "FFFF00", "00FFFF", "FF0000"],
 ["690011", "BF0426", "CC2738", "F2D99C", "E5B96F", "690011"],
 ["04BFBF", "CAFCD8", "F7E967", "A9CF54", "588F27", "04BFBF"],

@@ -1,9 +1,10 @@
 {
   "name": "AuroraV5",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Node.js-based LED pattern generator",
   "dependencies": {
     "express": "~4.8.7",
-    "socket.io": "~1.0.6"
+    "socket.io": "~1.0.6",
+    "ws": "~0.4.32"
   }
 }

@@ -4,14 +4,14 @@ function mod(m, n) {
 
 
 
-function Animator(numLeds, paletteMgr, delay, updateLEDsFunc,
-                  drawFunc, state, config) {
+function Animator(numLeds, paletteMgr, updateLEDsFunc,
+                  pattern, state, config) {
   this.numLeds = numLeds;
   this.clear();
   
   this.updateLEDsFunc = updateLEDsFunc;
   this.paletteMgr = paletteMgr;
-  this.drawFunc = drawFunc;
+  this.pattern = pattern;
   this.state = state;
   this.config = config;
 }
@@ -28,11 +28,26 @@ Animator.prototype.clear = function() {
 }
 
 Animator.prototype.run = function() {
-  this.state = this.drawFunc(this.leds, this.paletteMgr.getCurrent(), this.state, this.config);
-  this.updateLEDsFunc(this.leds);
+  var drawFunc;
+  if (this.pattern == "Gradient") {
+    drawFunc = drawGradient;
+  } else if (this.pattern == "Wave") {
+    drawFunc = drawWave;
+  } else if (this.pattern == "Pulse") {
+    drawFunc = drawPulse;
+  } else if (this.pattern == "Wipe") {
+    drawFunc = drawWipe;
+  } else {
+    drawFunc = null;
+  }
+
+  if (drawFunc != null) {
+    this.state = drawFunc(this.leds, this.paletteMgr.getCurrent(), this.state, this.config);
+    this.updateLEDsFunc(this.leds);
+  }
   
   var anim = this;
-  setTimeout(function() { anim.run(); }, anim.config.delay);
+  setTimeout(function() { anim.run(); }, this.config.delay);
 }
 
 
@@ -115,3 +130,7 @@ function drawWave(leds, palette, state, config) {
 
 function drawSparkle(leds, palette, state, config) {
 }
+
+
+module.exports.Animator = Animator;
+

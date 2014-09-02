@@ -28,3 +28,6 @@ function updateLEDs(socket, leds) {
   }
   socket.send(packet.buffer);
 }
+
+
+module.exports.update = updateLEDs;
