@@ -37,19 +37,7 @@ app.get('/', function(req, res) {
 
 app.get('/image', function(req, res) {
   fs.readFile('public/image.png', function(err, original_data){
-    if (err) {
-      console.log("Error loading image file: " + err);
-      res.send("");
-      return;
-    } else if (original_data.length == 0) {
-      console.log("Error loading image file: has no data");
-      res.send("");
-      return;
-    }
-    
-    var base64Image = original_data.toString('base64');
-    //console.log(base64Image);
-    var image = "data:image/png;base64," + base64Image;
+    var image = "data:image/png;base64," + original_data.toString('base64');
     res.send(image);
   });
 });
