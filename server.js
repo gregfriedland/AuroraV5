@@ -18,6 +18,7 @@ var WebSocket = require('ws');
 //// Server config variables ////
 var numColors = 1024;
 var numLEDs = 104;
+var startDrawer = 'Gradient';
 //var leapUpdateInterval = 100;
 
 
@@ -26,7 +27,6 @@ var drawers = {Gradient: new patterns.GradientDrawer(),
                Wipe: new patterns.WipeDrawer(),
                Wave: new patterns.WaveDrawer(),
                Pulse: new patterns.PulseDrawer()};
-var currDrawer = drawers['Gradient'];
 var animator;
 
 
@@ -61,9 +61,9 @@ fcSocket.on('open', function(msg) {
   
   var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
 
-  animator = new patterns.Animator(new leds.LEDs(numLEDs, fcSocket), paletteMgr, currDrawer);
+  animator = new patterns.Animator(new leds.LEDs(numLEDs, fcSocket), paletteMgr, drawers[startDrawer]);
 
-  console.log('starting drawer ' + currDrawer.name);
+  console.log('starting drawer ' + startDrawer);
   animator.run();
 });
 
@@ -78,23 +78,27 @@ io.sockets.on('connection', function (socket) {
   });
 
   // set the running program, return it's settings
+  // plus the palette
   socket.on('set program', function (program, fn) {
     console.log('set program: ' + program);
-    currDrawer = drawers[program];
-    fn({ranges: currDrawer.ranges, values: currDrawer.values});
+    animator.drawer = drawers[program];
+    fn(animator.getSettings());
   });
 
   // update the settings on the server
   socket.on('set settings', function (settingVals, fn) {
     console.log('set settings: ' + JSON.stringify(settingVals));
-    currDrawer.values = settingVals;
+    animator.setSettings(settingVals);
     //fn();
   });
 
   // randomize the settings on the server
   socket.on('randomize settings', function (data, fn) {
     console.log('randomize settings: ' + data);
-    //randomizeSettings();
-    fn(currDrawer.values);
+    animator.randomizeSettings();
+    fn(animator.getSettings().values);
   });
 });
+
+
+

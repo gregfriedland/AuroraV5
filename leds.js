@@ -59,7 +59,8 @@ LEDs.prototype.update = function() {
   var writeStream = png.pack();
   writeStream.pipe(out);
   writeStream.on('end', function() {
-    fs.renameSync('public/tmp.png', 'public/image.png');
+    if (fs.existsSync('public/tmp.png'))
+      fs.renameSync('public/tmp.png', 'public/image.png');
   });
 }
 

@@ -1,6 +1,14 @@
+var extend = require('extend');
+
+
 function mod(m, n) {
   return ((m % n) + n) % n;
 }
+
+function randomInt (low, high) {
+  return Math.floor(Math.random() * (high - low) + low);
+}
+
 
 
 
@@ -16,6 +24,31 @@ Animator.prototype.run = function() {
   
   var anim = this;
   setTimeout(function() { anim.run(); }, this.drawer.getDelay());
+}
+
+Animator.prototype.getSettings = function() {
+  var ranges = extend({}, this.drawer.ranges,
+                      {palette: [1,this.paletteMgr.palettes.length]});
+  var values = extend({}, this.drawer.values,
+                      {palette: this.paletteMgr.currPalette});
+  return {ranges: ranges, values: values};
+}
+
+Animator.prototype.setSettings = function(settingVals) {
+  for (setting in this.drawer.values) {
+    this.drawer.values[setting] = settingVals[setting];
+  }
+  this.paletteMgr.setCurrentIndex(settingVals.palette);
+}
+
+Animator.prototype.randomizeSettings = function() {
+  var d = this.drawer
+  var pm = this.paletteMgr;
+
+  for (setting in d.values) {
+    d.values[setting] = randomInt(d.ranges[setting][0], d.ranges[setting][1]+1);
+  }
+  pm.setCurrentIndex(randomInt(1,pm.palettes.length));
 }
 
 
