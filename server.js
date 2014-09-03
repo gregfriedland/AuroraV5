@@ -5,6 +5,7 @@ var leds = require('./leds.js');
 var palette = require('./palette.js');
 var allBaseColors = require('./kuler.js').allBaseColors;
 
+var fs = require('fs');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -25,13 +26,32 @@ var drawers = {Gradient: new patterns.GradientDrawer(),
                Wipe: new patterns.WipeDrawer(),
                Wave: new patterns.WaveDrawer(),
                Pulse: new patterns.PulseDrawer()};
-var currDrawer = drawers['Pulse'];
+var currDrawer = drawers['Gradient'];
 var animator;
 
 
 //// Start the http server ///
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/image', function(req, res) {
+  fs.readFile('public/image.png', function(err, original_data){
+    if (err) {
+      console.log("Error loading image file: " + err);
+      res.send("");
+      return;
+    } else if (original_data.length == 0) {
+      console.log("Error loading image file: has no data");
+      res.send("");
+      return;
+    }
+    
+    var base64Image = original_data.toString('base64');
+    //console.log(base64Image);
+    var image = "data:image/png;base64," + base64Image;
+    res.send(image);
+  });
 });
 
 app.use(express.static('public'));

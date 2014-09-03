@@ -123,3 +123,19 @@ function unbindSettingsEvents() {
 }
 
 
+//// Reload the output image every so often ////
+function updateImage() {
+  $.ajax({
+    type: "GET",
+    url:'/image?random='+new Date().getTime(),
+    contentType: "image/png",
+    timeout: 100,
+    success: function(data) {
+      if (data.length != 0) {
+        $('#image').attr("src", data);
+        //console.log("Got image: " + data);
+      }
+    }});
+  setTimeout(updateImage, 200);
+}
+updateImage();

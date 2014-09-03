@@ -1,3 +1,6 @@
+var PNG = require('pngjs').PNG;
+var fs = require('fs');
+
 
 function LEDs(length, socket) {
   this.length = length;
@@ -42,6 +45,22 @@ LEDs.prototype.update = function() {
       packet[dest++] = this.rgbs[i][2];
   }
   this.socket.send(packet.buffer);
+
+  // write the image to disk
+  var out = fs.createWriteStream('public/tmp.png');
+  var png = new PNG({width: this.length, height: 1});
+
+  for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
+    png.data[i]   = packet[j++];
+    png.data[i+1] = packet[j++];
+    png.data[i+2] = packet[j++];
+    png.data[i+3] = 255;
+  }
+  var writeStream = png.pack();
+  writeStream.pipe(out);
+  writeStream.on('end', function() {
+    fs.renameSync('public/tmp.png', 'public/image.png');
+  });
 }
 
 

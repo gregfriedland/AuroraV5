@@ -16,8 +16,8 @@ function getGradientColor(colors, gradientIndex, gradientSize) {
   var hex1 = Math.floor(gradientIndex * colors.length / gradientSize);
   var hex2 = (hex1 + 1) % colors.length;
 
-  var rgb1 = hexToRgb(hex1);
-  var rgb2 = hexToRgb(hex2);
+  var rgb1 = hexToRgb(colors[hex1]);
+  var rgb2 = hexToRgb(colors[hex2]);
 
   var subGradientSize = Math.floor(gradientSize / colors.length);
   gradientIndex = gradientIndex % subGradientSize;
