@@ -36,9 +36,9 @@ Animator.prototype.getSettings = function() {
 
 Animator.prototype.setSettings = function(settingVals) {
   for (setting in this.drawer.values) {
-    this.drawer.values[setting] = settingVals[setting];
+    this.drawer.values[setting] = parseInt(settingVals[setting]);
   }
-  this.paletteMgr.setCurrentIndex(settingVals.palette);
+  this.paletteMgr.setCurrentIndex(parseInt(settingVals.palette));
 }
 
 Animator.prototype.randomizeSettings = function() {
@@ -80,33 +80,34 @@ GradientDrawer.prototype.getDelay = function() {
 //                  delay between leds and after all leds
 function WipeDrawer() {
   this.name = "Wipe";
-  this.index = 0;
-  this.values = {speed: 20};
-  this.ranges = {speed: [0,100]};
+  this.ledIndex = 0;
+  this.colorIndex = 0;
+  this.values = {wipeSpeed: 20, colorSpeed: 5};
+  this.ranges = {wipeSpeed: [0,100], colorSpeed: [0, 20]};
 }
 
 WipeDrawer.prototype.draw = function(leds, palette) {
-  if (this.index == 0) {
+  if (this.ledIndex == 0) {
     leds.clear();
+    this.colorIndex = mod(this.colorIndex + this.values.colorSpeed, leds.length);
   }
 
-  var rgb = palette.rgbs[Math.floor(this.index * palette.numColors / leds.length)];
-  leds.rgbs[this.indexd] = rgb;
+  var rgbIndex = Math.floor((this.ledIndex + this.colorIndex) * palette.numColors / leds.length)
+  var rgb = palette.rgbs[mod(rgbIndex, palette.numColors)];
+  leds.rgbs[this.ledIndex] = rgb;
   
-  this.index = mod(this.index + 1, leds.length);
+  this.ledIndex = mod(this.ledIndex + 1, leds.length);
 }
 
 WipeDrawer.prototype.getDelay = function() {
-  return 1000/this.values.speed;
+  return 1000/this.values.wipeSpeed;
 }
-
 
 
 
 function PulseDrawer() {
   this.name = "Pulse";
-  this.colorIndex = 0;
-  this.pulseIndex = 0;
+  this.index = 0;
   this.values = {pulseSpeed: 20, colorSpeed: 3};
   this.ranges = {pulseSpeed: [0,100], colorSpeed: [0,10]};
   this.maxPulseVal = 256;
@@ -114,21 +115,19 @@ function PulseDrawer() {
 }
 
 PulseDrawer.prototype.draw = function(leds, palette) {
-  var rgb = palette.rgbs[this.colorIndex];
-
-  var pulseVal = this.pulseTable[this.pulseIndex]/this.maxPulseVal;
-  var pulsedRgb = [Math.floor(rgb[0]*pulseVal),
-                   Math.floor(rgb[1]*pulseVal),
-                   Math.floor(rgb[2]*pulseVal)];
-  
+  var pulseVal = this.pulseTable[this.index%this.pulseTable.length]/this.maxPulseVal;
   for (var l=0; l<leds.length; l++) {
-    leds.rgbs[l] = pulsedRgb;
+    var rgbIndex = (this.index+l) * this.values.colorSpeed;
+    
+    var rgb = palette.rgbs[rgbIndex % palette.numColors];
+    rgb = [Math.floor(rgb[0]*pulseVal),
+           Math.floor(rgb[1]*pulseVal),
+           Math.floor(rgb[2]*pulseVal)];
+    
+    leds.rgbs[l] = rgb;
   }
   
-  this.pulseIndex = mod(this.pulseIndex+1, this.pulseTable.length);
-  if (this.pulseIndex == 0) {
-    this.colorIndex = mod(this.colorIndex+this.values.colorSpeed, palette.numColors);
-  }
+  this.index++;
 }
 
 PulseDrawer.prototype.getDelay = function() {
@@ -140,19 +139,18 @@ PulseDrawer.prototype.getDelay = function() {
 function WaveDrawer() {
   this.name = "Wave";
   this.index = 0;
-  this.values = {waveSpeed: 20, colorSpeed: 3};
-  this.ranges = {waveSpeed: [0,100], colorSpeed: [0,10]};
-  this.maxWaveVal = 100;
-  this.waveTable = [0,1,4,9,16,25,36,49,64,81,100,121,144,169,196,225,196,169,144,121,100,81,64,49,36,25,16,9,4,1,0,0];
+  this.values = {waveSpeed: 20, waveSize: 10, colorSpeed: 3};
+  this.ranges = {waveSpeed: [0,100], waveSize: [2, 100], colorSpeed: [0, 10]};
 }
 
 
 WaveDrawer.prototype.draw = function(leds, palette) {
   for (var l=0; l<leds.length; l++) {
-    var waveIndex = (this.index + l) % this.waveTable.length;
-    var waveVal = this.waveTable[waveIndex]/this.maxWaveVal;
+    var waveIndex = (this.index+l) % this.values.waveSize;
+    var waveVal = Math.sin(waveIndex / this.values.waveSize * Math.PI);
 
-    var rgb = palette.rgbs[Math.floor(this.index * palette.numColors / leds.length)];
+    var rgbIndex = (this.index+l) * this.values.colorSpeed;
+    var rgb = palette.rgbs[rgbIndex % palette.numColors];
     var waveRgb = [Math.floor(rgb[0]*waveVal),
                    Math.floor(rgb[1]*waveVal),
                    Math.floor(rgb[2]*waveVal)];
@@ -160,7 +158,7 @@ WaveDrawer.prototype.draw = function(leds, palette) {
     leds.rgbs[l] = waveRgb;
   }
   
-  this.index = mod(this.index + this.values.colorSpeed, leds.length);
+  this.index++;
 }
 
 WaveDrawer.prototype.getDelay = function() {

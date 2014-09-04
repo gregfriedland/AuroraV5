@@ -7,45 +7,49 @@ function hexToRgb(hex) {
   return [r,g,b];
 }
 
-function interp(val, fromMax, toMin, toMax) {
-  if (val >= fromMax) return toMax;
-  return toMin + val*(toMax-toMin)/fromMax;
-}
-
 function getGradientColor(colors, gradientIndex, gradientSize) {
-  var hex1 = Math.floor(gradientIndex * colors.length / gradientSize);
+  var subGradientSize = Math.floor(gradientSize / (colors.length-1));
+
+  var hex1 = Math.floor(gradientIndex / subGradientSize);
   var hex2 = (hex1 + 1) % colors.length;
 
   var rgb1 = hexToRgb(colors[hex1]);
   var rgb2 = hexToRgb(colors[hex2]);
 
-  var subGradientSize = Math.floor(gradientSize / colors.length);
   gradientIndex = gradientIndex % subGradientSize;
 
   var rgb = [Math.floor(rgb1[0] + gradientIndex * (rgb2[0] - rgb1[0]) / subGradientSize),
              Math.floor(rgb1[1] + gradientIndex * (rgb2[1] - rgb1[1]) / subGradientSize),
              Math.floor(rgb1[2] + gradientIndex * (rgb2[2] - rgb1[2]) / subGradientSize)];
   
-  // look up gamma
-
+  //console.log(rgb);
   return rgb;
 }
+
 
 
 function Palette(index, baseColors, numColors) {
   this.index = index;
   this.baseColors = baseColors;
-  this.rgbs = this.getGradient(baseColors, numColors);
   this.numColors = numColors;
+
+  this.rgbs = [];
+  for (var i=0; i<numColors; i++) {
+    var rgb = getGradientColor(baseColors, i, numColors);
+    this.rgbs.push(rgb);
+  }
+  //console.log();
 }
 
-Palette.prototype.getGradient = function(colors, length) {
-  var rgbs = [];
-  for (var i=0; i<length; i++) {
-    var rgb = getGradientColor(colors, i, length);
-    rgbs.push(rgb);
+Palette.prototype.print = function() {
+  var s = "";
+  for (var i=0; i<this.rgbs.length; i++) {
+    s += ('000'+i).slice(-4) + ' ' +
+         ('00'+this.rgbs[i][0]).slice(-3) + ' ' +
+         ('00'+this.rgbs[i][1]).slice(-3) + ' ' +
+         ('00'+this.rgbs[i][2]).slice(-3) + '\n';
   }
-  return rgbs;
+  return s;
 }
 
 
@@ -57,6 +61,7 @@ function PaletteManager(allBaseColors, numColors) {
     this.palettes.push(new Palette(i, allBaseColors[i], numColors));
   }
   this.currPalette = Math.floor(Math.random() * allBaseColors.length);
+  //console.log(this.palettes[this.currPalette].print());
 }
 
 PaletteManager.prototype.getCurrent = function() {
