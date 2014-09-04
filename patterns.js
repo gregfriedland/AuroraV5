@@ -167,8 +167,64 @@ WaveDrawer.prototype.getDelay = function() {
 
 
 
-function drawSparkle(leds, palette, state, config) {
+function SparkleDrawer() {
+  this.name = "Sparkle";
+  this.colorIndex = 0;
+  this.sparkles = [];
+  this.values = {sparkleSpeed: 20, colorSpeed: 3, sparkleProb: 5, sparkleLength: 100};
+  this.ranges = {sparkleSpeed: [0, 100], colorSpeed: [0, 10], sparkleProb: [1,100], sparkleLength: [10, 200]};
 }
+
+SparkleDrawer.prototype.draw = function(leds, palette) {
+  // initialize when we know how many leds there are
+  if (this.sparkles.length == 0) {
+    for (var i=0; i<leds.length; i++) {
+      this.sparkles.push( {state: 'off', value: 0, rgb: null} );
+    }
+  }
+
+  leds.clear();
+
+  // randomly start new sparkles
+  if (Math.random() < this.values.sparkleProb/100.0) {
+    var sparkleIndex = Math.floor(Math.random()*leds.length);
+    var sparkle = this.sparkles[sparkleIndex];
+    if (sparkle.state == 'off') {
+      var rgbIndex = this.colorIndex * this.values.colorSpeed;
+      sparkle.rgb = palette.rgbs[rgbIndex % palette.numColors];
+      sparkle.state = 'up';
+    }
+  }
+  
+  for (var i=0; i<leds.length; i++) {
+    var sparkle = this.sparkles[i];
+    
+    // set leds from sparkles
+    if (sparkle.state != 'off') {
+      var sparkleVal = sparkle.value/this.values.sparkleLength;
+      leds.rgbs[i] = [sparkle.rgb[0]*sparkleVal,
+                      sparkle.rgb[1]*sparkleVal,
+                      sparkle.rgb[2]*sparkleVal];
+    }
+    
+    // adjust sparkles
+    if (sparkle.state == 'up') {
+      sparkle.value++;
+      if (sparkle.value >= this.values.sparkleLength) sparkle.state = 'down';
+    } else if (sparkle.state == 'down') {
+      sparkle.value--;
+      if (sparkle.value == 0) sparkle.state = 'off';
+    }
+  }
+  
+  this.colorIndex++;
+}
+
+SparkleDrawer.prototype.getDelay = function() {
+  return 1000/this.values.sparkleSpeed;
+}
+
+
 
 
 module.exports.Animator = Animator;
@@ -176,4 +232,5 @@ module.exports.GradientDrawer = GradientDrawer;
 module.exports.WipeDrawer = WipeDrawer;
 module.exports.WaveDrawer = WaveDrawer;
 module.exports.PulseDrawer = PulseDrawer;
+module.exports.SparkleDrawer = SparkleDrawer;
 

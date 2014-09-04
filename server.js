@@ -18,7 +18,7 @@ var WebSocket = require('ws');
 //// Server config variables ////
 var numColors = 1024;
 var numLEDs = 104;
-var startDrawer = 'Gradient';
+var startDrawer = 'Sparkle';
 //var leapUpdateInterval = 100;
 
 
@@ -26,6 +26,7 @@ var startDrawer = 'Gradient';
 var drawers = {Gradient: new patterns.GradientDrawer(),
                Wipe: new patterns.WipeDrawer(),
                Wave: new patterns.WaveDrawer(),
+               Sparkle: new patterns.SparkleDrawer(),
                Pulse: new patterns.PulseDrawer()};
 var animator;
 
