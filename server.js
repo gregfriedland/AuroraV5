@@ -20,7 +20,6 @@ var numColors = 1024;
 var numLEDs = 104;
 var startDrawer = 'Sparkle';
 var showImage = false;
-//var leapUpdateInterval = 100;
 
 
 //// Global variables ////
@@ -39,14 +38,14 @@ app.get('/', function(req, res) {
 
 if (showImage) {
   app.get('/image', function(req, res) {
-    fs.readFile('public/image.png', function(err, original_data){
+    fs.readFile(path.join(__dirname, 'public', 'image.png'), function(err, original_data){
       var image = "data:image/png;base64," + original_data.toString('base64');
       res.send(image);
     });
   });
 }
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 http.listen(80, function(){
   console.log('listening on *:80');
