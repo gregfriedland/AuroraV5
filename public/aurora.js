@@ -51,7 +51,7 @@ function createProgramsUI(socket, programs) {
 
 /////// Create the UI of the settings sliders //////////
 function createSettingsUI(socket, settingsRanges) {
-  var html = "<li data-role='fieldcontain'><button type='submit' id='randomize_settings_btn' data-theme='a'>Pick settings for me!</button></li>";
+  var html = "<li data-role='fieldcontain'><button type='submit' id='randomize_settings_btn' data-theme='a'>I feel lucky!</button></li>";
 
   for (var setting in settingsRanges) {
     var min = settingsRanges[setting][0];
@@ -141,3 +141,34 @@ function updateImage() {
   setTimeout(updateImage, 200);
 }
 updateImage();
+
+
+
+/*
+var lastLeapUpdate = new Date().getTime();
+Leap.loop(function(frame) {
+//Leap.loop({}, function(frame) {
+  var currTime = new Date().getTime();
+  if (currTime - lastLeapUpdate < leapUpdateInterval) {
+    return;
+  }
+  
+  lastLeapUpdate = currTime;
+  
+  var frameString = "Hands: " + frame.hands.length + "<br />"
+                + "Fingers: " + frame.fingers.length + "<br />"
+                + "Tools: " + frame.tools.length + "<br />"
+                + "Gestures: " + frame.gestures.length + "<br />";
+  if (frame.fingers.length > 0) {
+    var indexIncr = Math.floor(frame.fingers[0].tipPosition[0] / 20);
+    //anim.updateIndexFunc = makeIndexIncrementFunc(indexIncr, numLeds);
+    anim.config.incr = indexIncr;
+
+    frameString += "Finger1: " + frame.fingers[0].tipPosition + "<br/>"
+                 + "IndexIncr: " + indexIncr;
+  }
+        
+  var leapTxt = document.getElementById('leap');
+  leapTxt.innerHTML = frameString;
+});
+*/
