@@ -41,7 +41,7 @@ function createProgramsUI(socket, activeProgram, programs) {
   for (var i=0; i<programs.length; ++i) {
     var theme = programs[i] == activeProgram ? "b" : "a";
     
-    html = html + '<div class="ui-block-a"><a href="#" id="' + programs[i] + '" data-role="button" data-theme="' + theme + '">' + programs[i] + '</a></div>';
+    html = html + '<input type="button" data-inline="true" id="' + programs[i] + '" data-theme="' + theme + '" value="' + programs[i] + '">';
   }
   $("#programs").html(html);
   $("#programs").trigger("create");
@@ -62,13 +62,14 @@ function createProgramsUI(socket, activeProgram, programs) {
 
 /////// Create the UI of the settings sliders //////////
 function createSettingsUI(socket, settingsRanges) {
-  var html = "<li data-role='fieldcontain'><button type='submit' id='randomize_settings_btn' data-theme='a'>I feel lucky!</button></li>";
+  var html = "";
+  html += "<input type='button' data-inline='tre' id='randomize_settings_btn' data-theme='a' value='I feel lucky!'>";
 
   for (var setting in settingsRanges) {
     var min = settingsRanges[setting][0];
     var max = settingsRanges[setting][1];
-    html += "<li data-role='fieldcontain'><label for='"+setting+"slider'>"+setting+"</label>";
-    html += "<input type='range' name='"+setting+"slider' id='"+setting+"slider' value='"+min+"' min='"+min+"' max='"+max+"' data-highlight='true'></li>";
+    html += "<label for='"+setting+"slider'>"+setting+"</label>";
+    html += "<input type='range' name='"+setting+"slider' id='"+setting+"slider' value='"+min+"' min='"+min+"' max='"+max+"' data-highlight='true'>";
   }
   $("#settings").html(html);
   $("#settings").trigger("create");
