@@ -78,7 +78,7 @@ io.sockets.on('connection', function (socket) {
   // get the allowed programs
   socket.on('get programs', function (data, fn) {
     console.log('get programs: ' + JSON.stringify(data));
-    fn({programs: Object.keys(drawers), showImage);
+    fn(Object.keys(drawers));
   });
 
   // set the running program, return it's settings
