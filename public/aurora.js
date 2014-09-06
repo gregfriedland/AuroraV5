@@ -14,7 +14,7 @@ function emit(socket, msg, data, fn) {
 socket.on('connect', function () {
   console.log('connected');
   
-  emit(socket, 'get programs', null, function (data) {
+  emit(socket, 'get drawers', null, function (data) {
     createProgramsUI(socket, data);
   });
 });
@@ -23,28 +23,37 @@ socket.on('disconnect', function () {
   console.log('disconnected');
 });
 
-/////// Create the UI of the programs buttons //////////
+
+//// Get the program settings from the server and update the UI ////
+function setProgram(program) {
+  emit(socket, 'set drawer', program,
+    function (data) {
+      settingNames = Object.keys(data.values);
+      createSettingsUI(socket, data.ranges);
+      updateSettingsUI(socket, data.values);
+    }
+  )
+}
+
+//// Create the UI of the programs buttons ////
 function createProgramsUI(socket, programs) {
+  setProgram(programs.active);
+
   var html = "";
-  for (var i=0; i<programs.length; ++i) {
-    html = html + '<div class="ui-block-a"><button id="' + programs[i] + '" type="submit" data-theme="a">' + programs[i] + '</button></div>';
+  for (var i=0; i<programs.all.length; ++i) {
+    html = html + '<div class="ui-block-a"><button id="' + programs.all[i] + '" type="submit" data-theme="a">' + programs.all[i] + '</button></div>';
   }
   $("#programs").html(html);
   $("#programs").trigger("create");
   
   // and update the click bindings
-  for (var i=0; i<programs.length; ++i) {
-    $('#'+programs[i]).on('click', {prog:programs[i]}, function(event) {
-      event.preventDefault();
-      
-      emit(socket, 'set program', event.data.prog,
-        function (settingsData) {
-          settingNames = Object.keys(settingsData.values);
-          createSettingsUI(socket, settingsData.ranges);
-          updateSettingsUI(socket, settingsData.values);
-        }
-      );
-    });
+  for (var i=0; i<programs.all.length; ++i) {
+    $('#'+programs.all[i]).on('click',
+                          {program:programs.all[i]},
+                          function(event) {
+                            event.preventDefault();
+                            setProgram(event.data.program);
+                          });
   }
 }
 
@@ -124,6 +133,7 @@ function unbindSettingsEvents() {
 
 
 //// Reload the output image every so often ////
+var fails = 0;
 function updateImage() {
   $.ajax({
     type: "GET",
@@ -132,13 +142,18 @@ function updateImage() {
     timeout: 100,
     success: function(data) {
       if (data.length != 0) {
+        fails = 0;
         $('#image').attr("src", data);
         $('#image').attr("height", "50");
         $('#image').attr("width", "500");
         //console.log("Got image: " + data);
-      }
-    }});
-  setTimeout(updateImage, 200);
+      }},
+    error: function() {
+        fails++;
+      }});
+      
+  // run again if we haven't failed a bunch of times in a row
+  if (fails < 10) setTimeout(updateImage, 200);
 }
 updateImage();
 

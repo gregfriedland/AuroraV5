@@ -75,17 +75,18 @@ fcSocket.on('open', function(msg) {
 //// Handle the websockets connection to the client ////
 io.sockets.on('connection', function (socket) {
   // get the allowed programs
-  socket.on('get programs', function (data, fn) {
-    console.log('get programs: ' + JSON.stringify(data));
-    fn(Object.keys(drawers));
+  socket.on('get drawers', function (data, fn) {
+    console.log('get drawers: ' + JSON.stringify(data));
+    fn({active: animator.drawer.name, all: Object.keys(drawers)});
   });
 
   // set the running program, return it's settings
   // plus the palette
-  socket.on('set program', function (program, fn) {
-    console.log('set program: ' + program);
-    animator.drawer = drawers[program];
-    fn(animator.getSettings());
+  socket.on('set drawer', function (drawerName, fn) {
+    console.log('set drawer: ' + drawerName);
+    animator.drawer = drawers[drawerName];
+    var settings = animator.getSettings();
+    fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
   });
 
   // update the settings on the server
