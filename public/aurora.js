@@ -15,7 +15,7 @@ socket.on('connect', function () {
   console.log('connected');
   
   emit(socket, 'get drawers', null, function (data) {
-    createProgramsUI(socket, data);
+    createProgramsUI(socket, data.active, data.all);
   });
 });
 
@@ -24,7 +24,7 @@ socket.on('disconnect', function () {
 });
 
 
-//// Get the program settings from the server and update the UI ////
+//// Set the program on the server and get its settings; update the UI ////
 function setProgram(program) {
   emit(socket, 'set drawer', program,
     function (data) {
@@ -36,25 +36,27 @@ function setProgram(program) {
 }
 
 //// Create the UI of the programs buttons ////
-function createProgramsUI(socket, programs) {
-  setProgram(programs.active);
-
+function createProgramsUI(socket, activeProgram, programs) {
   var html = "";
-  for (var i=0; i<programs.all.length; ++i) {
-    html = html + '<div class="ui-block-a"><button id="' + programs.all[i] + '" type="submit" data-theme="a">' + programs.all[i] + '</button></div>';
+  for (var i=0; i<programs.length; ++i) {
+    var theme = programs[i] == activeProgram ? "b" : "a";
+    
+    html = html + '<div class="ui-block-a"><a href="#" id="' + programs[i] + '" data-role="button" data-theme="' + theme + '">' + programs[i] + '</a></div>';
   }
   $("#programs").html(html);
   $("#programs").trigger("create");
   
   // and update the click bindings
-  for (var i=0; i<programs.all.length; ++i) {
-    $('#'+programs.all[i]).on('click',
-                          {program:programs.all[i]},
+  for (var i=0; i<programs.length; ++i) {
+    $('#'+programs[i]).on('click',
+                          {program:programs[i]},
                           function(event) {
                             event.preventDefault();
-                            setProgram(event.data.program);
+                            createProgramsUI(socket, event.data.program, programs);
                           });
   }
+
+  setProgram(activeProgram);
 }
 
 
