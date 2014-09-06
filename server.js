@@ -48,8 +48,8 @@ if (showImage) {
 
 app.use(express.static('public'));
 
-http.listen(8080, function(){
-  console.log('listening on *:8080');
+http.listen(80, function(){
+  console.log('listening on *:80');
 });
 
 
