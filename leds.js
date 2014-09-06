@@ -2,9 +2,10 @@ var PNG = require('pngjs').PNG;
 var fs = require('fs');
 
 
-function LEDs(length, socket) {
+function LEDs(length, socket, writeImage) {
   this.length = length;
   this.socket = socket;
+  this.writeImage = writeImage;
   this.clear();
 }
 
@@ -47,21 +48,24 @@ LEDs.prototype.update = function() {
   this.socket.send(packet.buffer);
 
   // write the image to disk
-  var out = fs.createWriteStream('public/tmp.png');
-  var png = new PNG({width: this.length, height: 1});
+  if (this.writeImage) {
+    var out = fs.createWriteStream('public/tmp.png');
+    var png = new PNG({width: this.length, height: 1});
 
-  for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
-    png.data[i]   = packet[j++];
-    png.data[i+1] = packet[j++];
-    png.data[i+2] = packet[j++];
-    png.data[i+3] = 255;
+    for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
+      png.data[i]   = packet[j++];
+      png.data[i+1] = packet[j++];
+      png.data[i+2] = packet[j++];
+      png.data[i+3] = 255;
+    }
+    
+    var writeStream = png.pack();
+    writeStream.pipe(out);
+    writeStream.on('end', function() {
+      if (fs.existsSync('public/tmp.png'))
+        fs.renameSync('public/tmp.png', 'public/image.png');
+    });
   }
-  var writeStream = png.pack();
-  writeStream.pipe(out);
-  writeStream.on('end', function() {
-    if (fs.existsSync('public/tmp.png'))
-      fs.renameSync('public/tmp.png', 'public/image.png');
-  });
 }
 
 

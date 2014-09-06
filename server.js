@@ -19,6 +19,7 @@ var WebSocket = require('ws');
 var numColors = 1024;
 var numLEDs = 104;
 var startDrawer = 'Sparkle';
+var showImage = false;
 //var leapUpdateInterval = 100;
 
 
@@ -36,12 +37,14 @@ app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/image', function(req, res) {
-  fs.readFile('public/image.png', function(err, original_data){
-    var image = "data:image/png;base64," + original_data.toString('base64');
-    res.send(image);
+if (showImage) {
+  app.get('/image', function(req, res) {
+    fs.readFile('public/image.png', function(err, original_data){
+      var image = "data:image/png;base64," + original_data.toString('base64');
+      res.send(image);
+    });
   });
-});
+}
 
 app.use(express.static('public'));
 
@@ -62,7 +65,7 @@ fcSocket.on('open', function(msg) {
   
   var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
 
-  animator = new patterns.Animator(new leds.LEDs(numLEDs, fcSocket), paletteMgr, drawers[startDrawer]);
+  animator = new patterns.Animator(new leds.LEDs(numLEDs, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
 
   console.log('starting drawer ' + startDrawer);
   animator.run();
@@ -75,7 +78,7 @@ io.sockets.on('connection', function (socket) {
   // get the allowed programs
   socket.on('get programs', function (data, fn) {
     console.log('get programs: ' + JSON.stringify(data));
-    fn(Object.keys(drawers));
+    fn({programs: Object.keys(drawers), showImage);
   });
 
   // set the running program, return it's settings
