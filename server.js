@@ -64,14 +64,13 @@ fcSocket.on('close', function(event) {
 
 fcSocket.on('open', function(msg) {
   console.log('Connected to fcserver');
-  
-  var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-
-  animator = new patterns.Animator(new leds.LEDs(width, height, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
-
-  console.log('starting drawer ' + startDrawer);
-  animator.run();
 });
+
+//// Start the patterns ////
+var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
+animator = new patterns.Animator(new leds.LEDs(width, height, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
+console.log('starting drawer ' + startDrawer);
+animator.run();
 
 
 
