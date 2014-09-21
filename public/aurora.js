@@ -147,7 +147,7 @@ function updateImage() {
       if (data.length != 0) {
         fails = 0;
         $('#image').attr("src", data);
-        $('#image').attr("height", "50");
+        $('#image').attr("height", "300");
         $('#image').attr("width", "500");
         //console.log("Got image: " + data);
       }},

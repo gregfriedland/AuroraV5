@@ -61,9 +61,11 @@ function GradientDrawer() {
 }
 
 GradientDrawer.prototype.draw = function(leds, palette) {
-  for (var l=0; l<leds.length; l++) {
-    var rgb = palette.rgbs[Math.floor(((this.index + l) % leds.length) * palette.numColors / leds.length)];
-    leds.rgbs[l] = rgb;
+  for (var x=0; x<leds.width; x++) {
+    for (var y=0; y<leds.height; y++) {
+      var rgb = palette.rgbs[Math.floor(((this.index + x) % leds.length) * palette.numColors / leds.length)];
+      leds.rgbs[x][y] = rgb;
+    }
   }
   
   this.index = mod(this.index + 1, leds.length);

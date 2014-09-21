@@ -1,6 +1,7 @@
 //// Node.js server ////
 
 var patterns = require('./patterns.js');
+var alienblob = require('./alienblob.js');
 var leds = require('./leds.js');
 var palette = require('./palette.js');
 var allBaseColors = require('./kuler.js').allBaseColors;
@@ -17,13 +18,15 @@ var WebSocket = require('ws');
 
 //// Server config variables ////
 var numColors = 1024;
-var numLEDs = 104;
-var startDrawer = 'Sparkle';
-var showImage = false;
+var width = 32;
+var height = 18;
+var startDrawer = 'AlienBlob';
+var showImage = true;
 
 
 //// Global variables ////
-var drawers = {Gradient: new patterns.GradientDrawer(),
+var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
+               Gradient: new patterns.GradientDrawer(),
                Wipe: new patterns.WipeDrawer(),
                Wave: new patterns.WaveDrawer(),
                Sparkle: new patterns.SparkleDrawer(),
@@ -64,7 +67,7 @@ fcSocket.on('open', function(msg) {
   
   var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
 
-  animator = new patterns.Animator(new leds.LEDs(numLEDs, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
+  animator = new patterns.Animator(new leds.LEDs(width, height, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
 
   console.log('starting drawer ' + startDrawer);
   animator.run();

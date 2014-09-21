@@ -2,8 +2,9 @@ var PNG = require('pngjs').PNG;
 var fs = require('fs');
 
 
-function LEDs(length, socket, writeImage) {
-  this.length = length;
+function LEDs(width, height, socket, writeImage) {
+  this.width = width;
+  this.height = height;
   this.socket = socket;
   this.writeImage = writeImage;
   this.clear();
@@ -11,8 +12,11 @@ function LEDs(length, socket, writeImage) {
 
 LEDs.prototype.setAll = function(rgb) {
   this.rgbs = [];
-  for (var i=0; i<this.length; i++) {
-    this.rgbs.push(rgb);
+  for (var x=0; x<this.width; x++) {
+    this.rgbs[x] = [];
+    for (var y=0; y<this.height; y++) {
+      this.rgbs[x][y] = rgb;
+    }
   }
 }
 
@@ -21,7 +25,7 @@ LEDs.prototype.clear = function() {
 }
 
 LEDs.prototype.update = function() {
-  var packet = new Uint8ClampedArray(4 + this.rgbs.length * 3);
+  var packet = new Uint8ClampedArray(4 + this.width * this.height * 3);
 
   if (this.socket.readyState != 1 /* OPEN */) {
       console.log("Fadecandy server not open");
@@ -38,19 +42,22 @@ LEDs.prototype.update = function() {
       return;
   }
 
-  // Sample the center pixel of each LED
+  //console.log(this.rgbs);
+
   var dest = 4; // Dest position in our packet. Start right after the header.
-  for (var i = 0; i < this.rgbs.length; i++) {
-      packet[dest++] = this.rgbs[i][0];
-      packet[dest++] = this.rgbs[i][1];
-      packet[dest++] = this.rgbs[i][2];
+  for (var y = 0; y < this.height; y++) {
+    for (var x = 0; x < this.width; x++) {
+      packet[dest++] = this.rgbs[x][y][0];
+      packet[dest++] = this.rgbs[x][y][1];
+      packet[dest++] = this.rgbs[x][y][2];
+    }
   }
   this.socket.send(packet.buffer);
 
   // write the image to disk
   if (this.writeImage) {
     var out = fs.createWriteStream('public/tmp.png');
-    var png = new PNG({width: this.length, height: 1});
+    var png = new PNG({width: this.width, height: this.height});
 
     for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
       png.data[i]   = packet[j++];
