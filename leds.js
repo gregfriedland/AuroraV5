@@ -1,5 +1,7 @@
 var PNG = require('pngjs').PNG;
 
+var writeImageInterval = 10;
+
 function LEDs(width, height, socket, writeImage) {
   this.width = width;
   this.height = height;
@@ -7,6 +9,7 @@ function LEDs(width, height, socket, writeImage) {
   this.writeImage = writeImage;
   this.clear();
   this.pngData = "";
+  this.count = 0;
 }
 
 LEDs.prototype.setAll = function(rgb) {
@@ -24,6 +27,8 @@ LEDs.prototype.clear = function() {
 }
 
 LEDs.prototype.update = function() {
+  this.count++;
+  
   var packet = new Uint8ClampedArray(4 + this.width * this.height * 3);
   var dest = 4; // Dest position in our packet. Start right after the header.
   for (var y = 0; y < this.height; y++) {
@@ -35,7 +40,7 @@ LEDs.prototype.update = function() {
   }
 
   // write the image to disk
-  if (this.writeImage) {
+  if (this.writeImage && (this.count % writeImageInterval == 0)) {
     var png = new PNG({width: this.width, height: this.height});
 
     for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
