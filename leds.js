@@ -186,7 +186,7 @@ LEDs.prototype.sendData = function(packet) {
   } else {
     // Serial
     this.serial.drain(function(error) {
-      console.log("Error draining serial connection");
+      console.log("Error draining serial connection: " + error);
     });
     this.serial.write(packet.buffer);
   }
