@@ -144,8 +144,8 @@ LEDs.prototype.updateImage = function() {
   var png = new PNG({width: this.width, height: this.height});
 
   var dest = 0;
-  for (var x=0; x<this.width; x++) {
-    for (var y=0; y<this.height; y++) {
+  for (var y=0; y<this.height; y++) {
+    for (var x=0; x<this.width; x++) {
       for (var c=0; c<3; c++) {
         png.data[dest++] = this.rgbs[x][y][c];
       }
