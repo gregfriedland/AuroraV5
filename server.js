@@ -13,7 +13,6 @@ var http = require('http').Server(app);
 var socketIO = require('socket.io');
 var io = socketIO(http);
 var path = require('path');
-var WebSocket = require('ws');
 
 
 //// Server config variables ////
@@ -21,8 +20,7 @@ var numColors = 1024;
 var width = 32;
 var height = 18;
 var startDrawer = 'AlienBlob';
-var showImage = true;
-var fadeCandyServer = null;// "ws://localhost:7890";
+var device = "/dev/tty000"; ///dev/ttyACM0";// "ws://localhost:7890";
 
 //// Global variables ////
 var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
@@ -36,7 +34,7 @@ var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-var leds = new leds.LEDs(width, height, fcSocket, showImage);
+var leds = new leds.LEDs(width, height, device);
 var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer]);
 console.log('starting drawer ' + startDrawer);
 animator.run();
@@ -51,6 +49,7 @@ app.get('/', function(req, res) {
 if (showImage) {
   app.get('/image', function(req, res) {
     var image = "data:image/png;base64," + leds.pngData.toString('base64');
+    //leds.pngData = '';
     res.send(image);
   });
 }
@@ -62,21 +61,6 @@ http.listen(80, function(){
 });
 
 
-
-//// Start the websockets connection to the fadecandy server ////
-var fcSocket;
-if (fadeCandyServer) {
-  fcSocket = new WebSocket(fadeCandyServer);
-  fcSocket.on('close', function(event) {
-    console.log('Unable to connect to fcserver');
-  });
-
-  fcSocket.on('open', function(msg) {
-    console.log('Connected to fcserver');
-  });
-} else {
-  fcSocket = null;
-}
 
 
 
