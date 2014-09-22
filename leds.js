@@ -26,24 +26,6 @@ LEDs.prototype.clear = function() {
 
 LEDs.prototype.update = function() {
   var packet = new Uint8ClampedArray(4 + this.width * this.height * 3);
-
-  if (this.socket.readyState != 1 /* OPEN */) {
-      console.log("Fadecandy server not open");
-      // The server connection isn't open. Nothing to do.
-      return;
-  }
-
-  if (this.socket.bufferedAmount > packet.length) {
-      console.log("Fadecandy server connection problems");
-      // The network is lagging, and we still haven't sent the previous frame.
-      // Don't flood the network, it will just make us laggy.
-      // If fcserver is running on the same computer, it should always be able
-      // to keep up with the frames we send, so we shouldn't reach this point.
-      return;
-  }
-
-  //console.log(this.rgbs);
-
   var dest = 4; // Dest position in our packet. Start right after the header.
   for (var y = 0; y < this.height; y++) {
     for (var x = 0; x < this.width; x++) {
@@ -52,7 +34,6 @@ LEDs.prototype.update = function() {
       packet[dest++] = this.rgbs[x][y][2];
     }
   }
-  this.socket.send(packet.buffer);
 
   // write the image to disk
   if (this.writeImage) {
@@ -73,6 +54,29 @@ LEDs.prototype.update = function() {
         fs.renameSync('public/tmp.png', 'public/image.png');
     });
   }
+
+  if (this.socket == null) {
+    return;
+  }
+  
+  if (this.socket.readyState != 1 /* OPEN */) {
+    console.log("Fadecandy server not open");
+    // The server connection isn't open. Nothing to do.
+    return;
+  }
+
+  if (this.socket.bufferedAmount > packet.length) {
+    console.log("Fadecandy server connection problems");
+    // The network is lagging, and we still haven't sent the previous frame.
+    // Don't flood the network, it will just make us laggy.
+    // If fcserver is running on the same computer, it should always be able
+    // to keep up with the frames we send, so we shouldn't reach this point.
+    return;
+  }
+
+
+  this.socket.send(packet.buffer);
+
 }
 
 

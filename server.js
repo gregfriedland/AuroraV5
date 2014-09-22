@@ -22,7 +22,7 @@ var width = 32;
 var height = 18;
 var startDrawer = 'AlienBlob';
 var showImage = true;
-
+var fadeCandyServer = null;// "ws://localhost:7890";
 
 //// Global variables ////
 var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
@@ -57,14 +57,21 @@ http.listen(80, function(){
 
 
 //// Start the websockets connection to the fadecandy server ////
-var fcSocket = new WebSocket('ws://localhost:7890');
-fcSocket.on('close', function(event) {
-  console.log('Unable to connect to fcserver');
-});
+var fcSocket;
+if (fadeCandyServer) {
+  fcSocket = new WebSocket(fadeCandyServer);
+  fcSocket.on('close', function(event) {
+    console.log('Unable to connect to fcserver');
+  });
 
-fcSocket.on('open', function(msg) {
-  console.log('Connected to fcserver');
-});
+  fcSocket.on('open', function(msg) {
+    console.log('Connected to fcserver');
+  });
+} else {
+  fcSocket = null;
+}
+
+
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
