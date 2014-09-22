@@ -20,8 +20,13 @@ var numColors = 1024;
 var width = 32;
 var height = 18;
 var startDrawer = 'AlienBlob';
-var device = "/dev/ttyACM0";// "ws://localhost:7890";
 var layoutLeftToRight = true; // only used for serial port connections
+var device;
+if (process.argv.length > 2) {
+  device = process.argv[2];
+} else {
+  device = "/dev/ttyACM0"; // "ws://localhost:7890";
+}
 
 //// Global variables ////
 var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
