@@ -39,7 +39,9 @@ var gammaTable = [
     0xdb,0xdd,0xe0,0xe2,0xe4,0xe7,0xe9,0xeb,
     0xee,0xf0,0xf3,0xf5,0xf8,0xfa,0xfd,0xff];
 
-function LEDs(width, height, device) {
+function LEDs(width, height, device, layoutLeftToRight) {
+  this.layoutLeftToRight = typeof layoutLeftToRight !== 'undefined' ? layoutLeftToRight : true;
+
   this.width = width;
   this.height = height;
   this.clear();
@@ -63,11 +65,14 @@ function LEDs(width, height, device) {
     });
   } else if (device.indexOf("/dev/tty") > -1) {
     // ... or connect over a serial port ...
-    this.serial = SerialPort(device, {baudrate: 115200});
+    this.serial = new SerialPort(device, {baudrate: 115200});
 
     this.serial.on("open", function () {
       console.log('Connected to serial device ' + device);
       leds.connected = true;
+    });
+    this.serial.on('error', function(e) {
+      console.error('Serial port error: ' + e);
     });
   } else {
     // ... or don't connect to anything
@@ -107,16 +112,17 @@ LEDs.prototype.packData = function() {
     packet = new Uint8ClampedArray(this.width * this.height * 3);
     var dest = 0;
     for (var y=0; y<this.height; y++) {
-      if ((layout == 0 && y % 2 == 0) || (layout != 0 && y % 2 == 1)) {
+      if ((this.layoutLeftToRight == 0 && y % 2 == 0) ||
+          (this.layoutLeftToRight != 0 && y % 2 == 1)) {
         // flip
-        for (var x=0; x<width/2; x++) {
-          packet[dest++] = this.rgbs[width-1-x][y][0];
-          packet[dest++] = this.rgbs[width-1-x][y][1];
-          packet[dest++] = this.rgbs[width-1-x][y][2];
+        for (var x=0; x<this.width/2; x++) {
+          packet[dest++] = this.rgbs[this.width-1-x][y][0];
+          packet[dest++] = this.rgbs[this.width-1-x][y][1];
+          packet[dest++] = this.rgbs[this.width-1-x][y][2];
         }
       } else {
         // don't flip
-        for (var x=0; x<width/2; x++) {
+        for (var x=0; x<this.width/2; x++) {
           packet[dest++] = this.rgbs[x][y][0];
           packet[dest++] = this.rgbs[x][y][1];
           packet[dest++] = this.rgbs[x][y][2];
@@ -126,7 +132,7 @@ LEDs.prototype.packData = function() {
     
     // cap at 254 (the Teensy uses 255 to keep things in register) and apply the gamma
     for (var i=0; i<packet.length; i++) {
-      packet[i] = min(254, gammaTable[packet[i]]);
+      packet[i] = Math.min(254, gammaTable[packet[i]]);
     }
     packet[dest++] = 255; // add the termination
   }

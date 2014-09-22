@@ -20,7 +20,8 @@ var numColors = 1024;
 var width = 32;
 var height = 18;
 var startDrawer = 'AlienBlob';
-var device = "/dev/tty000"; ///dev/ttyACM0";// "ws://localhost:7890";
+var device = "/dev/ttyACM0";// "ws://localhost:7890";
+var layoutLeftToRight = true; // only used for serial port connections
 
 //// Global variables ////
 var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
@@ -34,7 +35,7 @@ var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-var leds = new leds.LEDs(width, height, device);
+var leds = new leds.LEDs(width, height, device, layoutLeftToRight);
 var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer]);
 console.log('starting drawer ' + startDrawer);
 animator.run();
@@ -46,13 +47,11 @@ app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-if (showImage) {
-  app.get('/image', function(req, res) {
-    var image = "data:image/png;base64," + leds.pngData.toString('base64');
-    //leds.pngData = '';
-    res.send(image);
-  });
-}
+app.get('/image', function(req, res) {
+  var image = "data:image/png;base64," + leds.pngData.toString('base64');
+  //leds.pngData = '';
+  res.send(image);
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
