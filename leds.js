@@ -1,7 +1,4 @@
 var PNG = require('pngjs').PNG;
-var fs = require('fs');
-
-var imageWriteInterval = 10; // write image.png every X frames
 
 function LEDs(width, height, socket, writeImage) {
   this.width = width;
@@ -9,7 +6,7 @@ function LEDs(width, height, socket, writeImage) {
   this.socket = socket;
   this.writeImage = writeImage;
   this.clear();
-  this.count = 0;
+  this.pngData = "";
 }
 
 LEDs.prototype.setAll = function(rgb) {
@@ -27,8 +24,6 @@ LEDs.prototype.clear = function() {
 }
 
 LEDs.prototype.update = function() {
-  this.count++;
-
   var packet = new Uint8ClampedArray(4 + this.width * this.height * 3);
   var dest = 4; // Dest position in our packet. Start right after the header.
   for (var y = 0; y < this.height; y++) {
@@ -40,8 +35,7 @@ LEDs.prototype.update = function() {
   }
 
   // write the image to disk
-  if (this.writeImage && (this.count % imageWriteInterval == 0)) {
-    var out = fs.createWriteStream('public/tmp.png');
+  if (this.writeImage) {
     var png = new PNG({width: this.width, height: this.height});
 
     for (var i=0, j=4; i<png.width * png.height * 4; i+=4) {
@@ -51,12 +45,15 @@ LEDs.prototype.update = function() {
       png.data[i+3] = 255;
     }
     
-    var writeStream = png.pack();
-    writeStream.pipe(out);
-    writeStream.on('end', function() {
-      if (fs.existsSync('public/tmp.png'))
-        fs.renameSync('public/tmp.png', 'public/image.png');
+    var leds = this;
+    var chunks = [];
+    png.on('data', function(chunk) {
+      chunks.push(chunk);
     });
+    png.on('end', function() {
+       leds.pngData = Buffer.concat(chunks);
+    });
+    png.pack();
   }
 
   if (this.socket == null) {
@@ -78,10 +75,9 @@ LEDs.prototype.update = function() {
     return;
   }
 
-
   this.socket.send(packet.buffer);
-
 }
+
 
 
 module.exports.LEDs = LEDs;

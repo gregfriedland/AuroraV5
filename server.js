@@ -31,7 +31,16 @@ var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors
                Wave: new patterns.WaveDrawer(),
                Sparkle: new patterns.SparkleDrawer(),
                Pulse: new patterns.PulseDrawer()};
-var animator;
+
+
+
+//// Start the patterns ////
+var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
+var leds = new leds.LEDs(width, height, fcSocket, showImage);
+var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer]);
+console.log('starting drawer ' + startDrawer);
+animator.run();
+
 
 
 //// Start the http server ///
@@ -41,10 +50,8 @@ app.get('/', function(req, res) {
 
 if (showImage) {
   app.get('/image', function(req, res) {
-    fs.readFile(path.join(__dirname, 'public', 'image.png'), function(err, original_data){
-      var image = "data:image/png;base64," + original_data.toString('base64');
-      res.send(image);
-    });
+    var image = "data:image/png;base64," + leds.pngData.toString('base64');
+    res.send(image);
   });
 }
 
@@ -70,14 +77,6 @@ if (fadeCandyServer) {
 } else {
   fcSocket = null;
 }
-
-
-
-//// Start the patterns ////
-var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-animator = new patterns.Animator(new leds.LEDs(width, height, fcSocket, showImage), paletteMgr, drawers[startDrawer]);
-console.log('starting drawer ' + startDrawer);
-animator.run();
 
 
 
