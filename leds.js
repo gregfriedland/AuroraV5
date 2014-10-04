@@ -66,11 +66,6 @@ function LEDs(width, height, device, layoutLeftToRight) {
     });
   } else if (device.indexOf("/dev/tty") > -1) {
     // ... or connect over a serial port ...
-//    fs.stat(device, function(err, stats) {
-//      if (err != null) {
-//        console.log("Couldn't find serial device " + device);
-//        process.exit();
-//      }
     leds.serial = new SerialPort(device, {baudrate: 115200});
   
     leds.serial.on("open", function () {
@@ -80,7 +75,6 @@ function LEDs(width, height, device, layoutLeftToRight) {
     leds.serial.on('error', function(e) {
       console.error('Serial port error: ' + e);
     });
-//    });
   } else {
     // ... or don't connect to anything
   }
@@ -114,6 +108,13 @@ LEDs.prototype.packData = function() {
         packet[dest++] = this.rgbs[x][y][2];
       }
     }
+
+    // apply gamma table again even though fadecandy is supposed to
+    // do this; this makes sure the colors are rich
+    for (var i=0; i<packet.length; i++) {
+      packet[i] = gammaTable[packet[i]];
+    }
+    
     return packet.buffer;
   } else {
     // Serial
