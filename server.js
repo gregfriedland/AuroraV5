@@ -30,14 +30,17 @@ if (process.argv.length > 2) {
 }
 
 //// Global variables ////
-var drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
-               Bzr: new bzr.BzrDrawer(width, height, numColors),
-               Gradient: new patterns.GradientDrawer(),
-               Wipe: new patterns.WipeDrawer(),
-               Wave: new patterns.WaveDrawer(),
-               Sparkle: new patterns.SparkleDrawer(),
-               Pulse: new patterns.PulseDrawer()};
-
+var drawers;
+if (height == 1) {
+  drawers = {Gradient: new patterns.GradientDrawer(),
+             Wipe: new patterns.WipeDrawer(),
+             Wave: new patterns.WaveDrawer(),
+             Sparkle: new patterns.SparkleDrawer(),
+             Pulse: new patterns.PulseDrawer()};
+} else {
+  drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
+             Bzr: new bzr.BzrDrawer(width, height, numColors)};
+}
 
 
 //// Start the patterns ////
