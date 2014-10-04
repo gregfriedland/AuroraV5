@@ -1,7 +1,3 @@
-function random(max) {
-  return
-}
-
 function AlienBlobDrawer(width, height, numColors) {
   this.name = "AlienBlob";
   this.pos = Math.floor(Math.random() * 1e6);
@@ -15,7 +11,7 @@ function AlienBlobDrawer(width, height, numColors) {
 }
 
 AlienBlobDrawer.prototype.draw = function(leds, palette) {
-  indices = this.alienblob.run(this.pos, this.values["zoom"]/100.0, this.values["detail"], this.decay);
+  var indices = this.alienblob.run(this.pos, this.values["zoom"]/100.0, this.values["detail"], this.decay);
   //console.log(indices);
   
   for (var x=0; x<leds.width; x++) {
