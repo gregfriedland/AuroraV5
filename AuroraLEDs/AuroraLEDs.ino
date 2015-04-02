@@ -1,5 +1,5 @@
 /*
-  Required Connections
+  Required Connections for WS2811
   --------------------
     pin 2:  LED Strip #1    OctoWS2811 drives 8 LED Strips.
     pin 14: LED strip #2    All 8 are the same length.
@@ -16,13 +16,13 @@
             logic analyzer or even an LED (brighter = CPU busier)
 */
 
-#define LED_TYPE 2801
+#define ADAFRUIT_MATRIX 77
+#define LED_TYPE ADAFRUIT_MATRIX // 2801 | 2811 | ADAFRUIT_MATRIX
 #define WIDTH 32
-#define HEIGHT 18
+#define HEIGHT 32
 #define BLINK_PIN 13
 
 #define p(...) Serial.print(__VA_ARGS__)
-#define MIN(a,b) ((a)>(b)?(a):(b))
 
 #if (LED_TYPE==2811)
   #include <OctoWS2811.h>
@@ -31,15 +31,22 @@
   DMAMEM int displayMemory[LEDS_PER_STRIP*6];
   int drawingMemory[LEDS_PER_STRIP*6];
   OctoWS2811 leds(LEDS_PER_STRIP, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
-#else
-  #include "FastSPI_LED2.h"
+#elif (LED_TYPE==2801)
+  #include "FastLED.h"
   #define CLOCK_PIN 2 // data line 1
   #define DATA_PIN 14 // data line 2
   CRGB leds[WIDTH*HEIGHT];
+#elif (LED_TYPE==ADAFRUIT_MATRIX)
+  #include <SmartMatrix_32x32.h>
+  #include <FastLED.h>
+  CRGB leds[WIDTH * HEIGHT];
 
-  #define BUFFER_SIZE 1500
-  static byte buffer[BUFFER_SIZE];
+  //#include <DueTimer.h>
+  //#include "AdafruitMatrix.h"
 #endif
+
+#define BUFFER_SIZE 1500
+static byte buffer[BUFFER_SIZE];
 
 
 void setup() {
@@ -53,61 +60,70 @@ void setup() {
 
 #if (LED_TYPE==2811)
   leds.begin();
-#else
+#elif (LED_TYPE==2801)
   FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, BRG, DATA_RATE_MHZ(4)>(leds, WIDTH*HEIGHT);
   memset(leds, 0, sizeof(leds));
+#elif (LED_TYPE==ADAFRUIT_MATRIX)
+  LEDS.addLeds<SMART_MATRIX>(leds,WIDTH*HEIGHT);
+  LEDS.setBrightness(128);  
+
+  // FastLED disables SmartMatrix's gamma correction by default, turn it on if you like
+  //pSmartMatrix->setColorCorrection(cc48);
+
+  // With gamma correction on, the 24 bit color gets stretched out over 36-bits, now
+  // try enabling/disabling FastLED's dithering and see the effect
+  //FastLED.setDither( 0 );
+
+  //Matrix_init();
 #endif
 
 }
 
-static int lastBlinkTime = 0;
-static boolean lastBlinkState = LOW;
 static int pix=0;
+static uint8_t rgb[3];
 
 void loop() {
-
-#if (LED_TYPE==2811)
-  // FIX: this won't work yet because the data order expected is probably different than the one being sent: check VideoDisplay pde sketch
-  int count = Serial.readBytes((char *)drawingMemory, sizeof(drawingMemory));
-  if (count != sizeof(drawingMemory)) {
-    memset(drawingMemory, 0, sizeof(drawingMemory));
-    leds.setPixel(0, 0xFF0000);
-  }
-  leds.show();
-#else
-    //int nbytes = Serial.readBytes((char*)buffer, BUFFER_SIZE);
-//    int avail = Serial.available();
-//    Serial.println(avail);
-//    int nbytes = Serial.readBytes((char*)buffer, MIN(avail, BUFFER_SIZE));
-
   int nbytes = Serial.readBytes((char*)buffer, BUFFER_SIZE);
-
 
   for (int i=0; i<nbytes; i++) {
     int c = (int)buffer[i];
     if (c == 255) {
         digitalWrite(BLINK_PIN, HIGH);
-        delayMicroseconds(300);
+        delayMicroseconds(3000);
         digitalWrite(BLINK_PIN, LOW);
+
+        p(".");
+
+#if (LED_TYPE==2811)
+        leds.show();
+#elif (LED_TYPE==2801)
         FastLED.show();
         memset(leds, 0, sizeof(leds));
+#elif (LED_TYPE==ADAFRUIT_MATRIX)
+        LEDS.show();
+        memset(leds, 0, sizeof(leds));
+        //update_LEDs(); 
+#endif
 
         pix = 0;
     } else {
+      //if (pix%30 == 0) p(".");
+
+#if (LED_TYPE==2811)
+#elif (LED_TYPE==2801)
       leds[pix/3] += (c) << (8*(pix%3));
-//
-////      // uncomment this to print color data to Serial
-////      if (pix <= 2) { p(c,DEC); p(" "); }
-////      CRGB col = leds[pix/3];
-////      if (pix == 2) {
-////        p(col.r,DEC); p(" "); p(col.g,DEC); p(" "); p(col.b,DEC);
-////        p("\n"); Serial.flush();
-//      }
-//
+#elif (LED_TYPE==ADAFRUIT_MATRIX)
+      leds[pix/3][pix%3] = c;
+
+      int led_num = pix/3;
+      // if (pix%3 == 2) {
+      //   set_pixel(led_num%WIDTH, led_num/WIDTH, rgb[0], rgb[1], rgb[2]);
+      //   leds[led_num] = CRGB(rgb[0], rgb[1], rgb[2]);
+      //   memset(rgb, 0, sizeof(rgb));
+      // }
+#endif
+
       pix++;
     }
   }
-#endif
 }
-
-
