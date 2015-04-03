@@ -4,6 +4,7 @@ var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
 var updateImageInterval = 10;
+var fpsOutputMillis = 5000;
 
 // 256 8-bit values; gamma=2.5
 var gammaTable = [
@@ -44,12 +45,15 @@ function LEDs(width, height, device, layoutLeftToRight) {
   this.layoutLeftToRight = layoutLeftToRight;
   this.width = width;
   this.height = height;
+  this.lastUpdateMillis = new Date().getTime();
+
   this.clear();
   this.pngData = "";
   this.count = 0;
   this.socket = null;
   this.serial = null;
   this.connected = false;
+  this.frameTimer = { count: 0, lastUpdate: new Date().getTime() }
   var leds = this; // for closures
   
   if (device.indexOf("ws:") > -1) {
@@ -210,6 +214,13 @@ LEDs.prototype.update = function() {
   if (this.connected) {
     var packet = this.packData();
     this.sendData(packet);
+
+    this.frameTimer.count++;
+    var timeDiff = new Date().getTime() - this.frameTimer.lastUpdate;
+    if (timeDiff > fpsOutputMillis) {
+      console.log((this.frameTimer.count / timeDiff * 1000).toFixed(1) + " fps");
+      this.frameTimer = { count: 0, lastUpdate: new Date().getTime() }
+    }
   }
 }
 
