@@ -26,3 +26,8 @@ Version 5 of the Aurora LED wall project.
   1. `git clone https://github.com/gregfriedland/AuroraV5.git`
   2. `cd AuroraV5`
   3. `npm install`
+
+
+Issues
+1. Bzr runs at <30fps when speed is low
+2. Does color speed work on Bzr?

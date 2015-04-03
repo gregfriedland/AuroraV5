@@ -1,4 +1,6 @@
 var extend = require('extend');
+var NanoTimer = require('nanotimer');
+var nanoTimer = new NanoTimer();
 
 
 function mod(m, n) {
@@ -16,15 +18,16 @@ function Animator(leds, paletteMgr, drawer, fps) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
   this.drawer = drawer;
-  this.updateInterval = 1000.0 / fps;
+  this.updateIntervalMicros = 1000000 / fps;
 }
 
 Animator.prototype.run = function() {
-  this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
-  this.leds.update()
-  
   var anim = this;
-  setTimeout(function() { anim.run(); }, Math.max(this.updateInterval, this.drawer.getDelay()));
+  nanoTimer.setTimeout(function() { anim.run(); }, null, 
+    Math.max(this.updateIntervalMicros, this.drawer.getDelay() * 1000).toFixed() + "u");
+
+  this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
+  this.leds.update()  
 }
 
 Animator.prototype.getSettings = function() {

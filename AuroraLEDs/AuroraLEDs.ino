@@ -40,9 +40,6 @@
   #include <SmartMatrix_32x32.h>
   #include <FastLED.h>
   CRGB leds[WIDTH * HEIGHT];
-
-  //#include <DueTimer.h>
-  //#include "AdafruitMatrix.h"
 #endif
 
 #define BUFFER_SIZE 1500
