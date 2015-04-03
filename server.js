@@ -19,9 +19,9 @@ var path = require('path');
 //// Server config variables ////
 var numColors = 1024;
 var width = 32;
-var height = 18;
+var height = 32;
 var startDrawer = 'Bzr';
-var layoutLeftToRight = true; // only used for serial port connections
+var layoutLeftToRight = false; // only used for serial port connections
 var device;
 if (process.argv.length > 2) {
   device = process.argv[2];
@@ -65,8 +65,8 @@ app.get('/image', function(req, res) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-http.listen(80, function(){
-  console.log('listening on *:80');
+http.listen(8080, function(){
+  console.log('listening on *:8080');
 });
 
 

@@ -41,8 +41,7 @@ var gammaTable = [
     0xee,0xf0,0xf3,0xf5,0xf8,0xfa,0xfd,0xff];
 
 function LEDs(width, height, device, layoutLeftToRight) {
-  this.layoutLeftToRight = typeof layoutLeftToRight !== 'undefined' ? layoutLeftToRight : true;
-
+  this.layoutLeftToRight = layoutLeftToRight;
   this.width = width;
   this.height = height;
   this.clear();
@@ -120,8 +119,8 @@ LEDs.prototype.packData = function() {
     // Serial
     packet = [];
     for (var y=0; y<this.height; y++) {
-      if ((this.layoutLeftToRight == 0 && y % 2 == 0) ||
-          (this.layoutLeftToRight != 0 && y % 2 == 1)) {
+      if ((this.layoutLeftToRight && y % 2 == 0) ||
+          (this.layoutLeftToRight && y % 2 == 1)) {
         // flip
         for (var x=0; x<this.width; x++) {
           packet.push(this.rgbs[this.width-1-x][y][0]);
