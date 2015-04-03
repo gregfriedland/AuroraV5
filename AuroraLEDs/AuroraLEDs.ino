@@ -65,7 +65,7 @@ void setup() {
   memset(leds, 0, sizeof(leds));
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
   LEDS.addLeds<SMART_MATRIX>(leds,WIDTH*HEIGHT);
-  LEDS.setBrightness(128);  
+  LEDS.setBrightness(255);  
 
   // FastLED disables SmartMatrix's gamma correction by default, turn it on if you like
   //pSmartMatrix->setColorCorrection(cc48);
@@ -73,14 +73,11 @@ void setup() {
   // With gamma correction on, the 24 bit color gets stretched out over 36-bits, now
   // try enabling/disabling FastLED's dithering and see the effect
   //FastLED.setDither( 0 );
-
-  //Matrix_init();
 #endif
 
 }
 
 static int pix=0;
-static uint8_t rgb[3];
 
 void loop() {
   int nbytes = Serial.readBytes((char*)buffer, BUFFER_SIZE);
@@ -102,25 +99,15 @@ void loop() {
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
         LEDS.show();
         memset(leds, 0, sizeof(leds));
-        //update_LEDs(); 
 #endif
 
         pix = 0;
     } else {
-      //if (pix%30 == 0) p(".");
-
 #if (LED_TYPE==2811)
 #elif (LED_TYPE==2801)
       leds[pix/3] += (c) << (8*(pix%3));
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
       leds[pix/3][pix%3] = c;
-
-      int led_num = pix/3;
-      // if (pix%3 == 2) {
-      //   set_pixel(led_num%WIDTH, led_num/WIDTH, rgb[0], rgb[1], rgb[2]);
-      //   leds[led_num] = CRGB(rgb[0], rgb[1], rgb[2]);
-      //   memset(rgb, 0, sizeof(rgb));
-      // }
 #endif
 
       pix++;
