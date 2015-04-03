@@ -12,10 +12,11 @@ function randomInt (low, high) {
 
 
 
-function Animator(leds, paletteMgr, drawer) {
+function Animator(leds, paletteMgr, drawer, fps) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
   this.drawer = drawer;
+  this.updateInterval = 1000.0 / fps;
 }
 
 Animator.prototype.run = function() {
@@ -23,7 +24,7 @@ Animator.prototype.run = function() {
   this.leds.update()
   
   var anim = this;
-  setTimeout(function() { anim.run(); }, this.drawer.getDelay());
+  setTimeout(function() { anim.run(); }, Math.max(this.updateInterval, this.drawer.getDelay()));
 }
 
 Animator.prototype.getSettings = function() {

@@ -20,6 +20,7 @@ var path = require('path');
 var numColors = 1024;
 var width = 32;
 var height = 32;
+var fps = 40;
 var startDrawer = 'Bzr';
 var layoutLeftToRight = false; // only used for serial port connections
 var device;
@@ -46,7 +47,7 @@ if (height == 1) {
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
 var leds = new leds.LEDs(width, height, device, layoutLeftToRight);
-var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer]);
+var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer], fps);
 console.log('starting drawer ' + startDrawer);
 animator.run();
 
