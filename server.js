@@ -20,7 +20,7 @@ var path = require('path');
 var numColors = 1024;
 var width = 32;
 var height = 32;
-var fps = 40;
+var fps = 45;
 var startDrawer = 'Bzr';
 var layoutLeftToRight = false; // only used for serial port connections
 var device;
@@ -87,6 +87,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('set drawer', function (drawerName, fn) {
     console.log('set drawer: ' + drawerName);
     animator.drawer = drawers[drawerName];
+    animator.drawer.reset()
     var settings = animator.getSettings();
     fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
   });
@@ -102,6 +103,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('randomize settings', function (data, fn) {
     console.log('randomize settings: ' + data);
     animator.randomizeSettings();
+    animator.drawer.reset()
     fn(animator.getSettings().values);
   });
 });

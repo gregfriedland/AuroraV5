@@ -10,6 +10,11 @@ function AlienBlobDrawer(width, height, numColors) {
   this.alienblob = new AlienBlob(width, height, numColors);
 }
 
+AlienBlobDrawer.prototype.reset = function() {
+  this.pos = Math.floor(Math.random() * 1e6);
+  this.colorIndex = 0;
+}
+
 AlienBlobDrawer.prototype.draw = function(leds, palette) {
   var indices = this.alienblob.run(this.pos, this.values["zoom"]/100.0, this.values["detail"], this.decay);
   //console.log(indices);

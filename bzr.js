@@ -31,6 +31,10 @@ BzrDrawer.prototype.getDelay = function() {
   return 1000/this.values.speed;
 }
 
+BzrDrawer.prototype.reset = function() {
+  this.bzr.randomize(0, 0, this.bzr.bzrDims.width, this.bzr.bzrDims.height);
+}
+
 
 
 function Bzr(ledDims, bzrDims, numColors) {
