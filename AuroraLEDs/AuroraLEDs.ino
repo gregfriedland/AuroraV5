@@ -1,26 +1,12 @@
-/*
-  Required Connections for WS2811
-  --------------------
-    pin 2:  LED Strip #1    OctoWS2811 drives 8 LED Strips.
-    pin 14: LED strip #2    All 8 are the same length.
-    pin 7:  LED strip #3
-    pin 8:  LED strip #4    A 100 ohm resistor should used
-    pin 6:  LED strip #5    between each Teensy pin and the
-    pin 20: LED strip #6    wire to the LED strip, to minimize
-    pin 21: LED strip #7    high frequency ringining & noise.
-    pin 5:  LED strip #8
-    pin 15 & 16 - Connect together, but do not use
-    pin 4 - Do not use
-    pin 3 - Do not use as PWM.  Normal use is ok.
-    pin 1 - Output indicating CPU usage, monitor with an oscilloscope,
-            logic analyzer or even an LED (brighter = CPU busier)
-*/
+// Arduino code to listen for pixel data in serial format from a PC/RaspberryPi,
+// and relay it to an LED matrix or strip
 
 #define ADAFRUIT_MATRIX 77
 #define LED_TYPE ADAFRUIT_MATRIX // 2801 | 2811 | ADAFRUIT_MATRIX
 #define WIDTH 32
 #define HEIGHT 32
 #define BLINK_PIN 13
+#define OUTPUT_FPS_INTERVAL 3000
 
 #define p(...) Serial.print(__VA_ARGS__)
 
@@ -37,7 +23,7 @@
   #define DATA_PIN 14 // data line 2
   CRGB leds[WIDTH*HEIGHT];
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
-  #include <SmartMatrix_32x32.h>
+  #include <SmartMatrix.h>
   #include <FastLED.h>
   CRGB leds[WIDTH * HEIGHT];
 #endif
@@ -65,13 +51,28 @@ void setup() {
   LEDS.setBrightness(255);  
 
   // FastLED disables SmartMatrix's gamma correction by default, turn it on if you like
-  //pSmartMatrix->setColorCorrection(cc48);
+  pSmartMatrix->setColorCorrection(cc24);
 
   // With gamma correction on, the 24 bit color gets stretched out over 36-bits, now
   // try enabling/disabling FastLED's dithering and see the effect
   //FastLED.setDither( 0 );
 #endif
 
+}
+
+uint32_t lastFpsOutputTime = millis();
+int32_t fpsOutputCount = 0;
+
+void outputFPS() {
+  // output effective FPS every so often
+  fpsOutputCount++;
+  uint32_t fpsOutputTimeDiff = millis() - lastFpsOutputTime;
+  if (fpsOutputTimeDiff > OUTPUT_FPS_INTERVAL) {
+    int32_t fps = fpsOutputCount * 1000UL / fpsOutputTimeDiff;
+    p(fps);
+    fpsOutputCount = 0;
+    lastFpsOutputTime = millis();
+  }
 }
 
 static int pix=0;
@@ -83,10 +84,10 @@ void loop() {
     int c = (int)buffer[i];
     if (c == 255) {
         digitalWrite(BLINK_PIN, HIGH);
-        delayMicroseconds(3000);
+        delayMicroseconds(1000);
         digitalWrite(BLINK_PIN, LOW);
 
-        p(".");
+        //p(".");
 
 #if (LED_TYPE==2811)
         leds.show();
@@ -99,6 +100,7 @@ void loop() {
 #endif
 
         pix = 0;
+        outputFPS();
     } else {
 #if (LED_TYPE==2811)
 #elif (LED_TYPE==2801)
