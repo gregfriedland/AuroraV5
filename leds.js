@@ -5,6 +5,7 @@ var SerialPort = require("serialport").SerialPort;
 
 var updateImageInterval = 10;
 var fpsOutputMillis = 5000;
+var correctGamma = false;
 
 // 256 8-bit values; gamma=2.5
 var gammaTable = [
@@ -75,6 +76,9 @@ function LEDs(width, height, device, layoutLeftToRight) {
       console.log('Connected to serial device ' + device);
       leds.connected = true;
     });
+    leds.serial.on("data", function(data) {
+      console.log("Serial data: " + data);
+    });
     leds.serial.on('error', function(e) {
       console.error('Serial port error: ' + e);
     });
@@ -112,12 +116,14 @@ LEDs.prototype.packData = function() {
       }
     }
 
-    // apply gamma table again even though fadecandy is supposed to
-    // do this; this makes sure the colors are rich
-    for (var i=0; i<packet.length; i++) {
-      packet[i] = gammaTable[packet[i]];
+    if (correctGamma) {
+      // apply gamma table again even though fadecandy is supposed to
+      // do this; this makes sure the colors are rich
+      for (var i=0; i<packet.length; i++) {
+        packet[i] = gammaTable[packet[i]];
+      }
     }
-    
+
     return packet.buffer;
   } else {
     // Serial
@@ -143,7 +149,9 @@ LEDs.prototype.packData = function() {
     
     // cap at 254 (the Teensy uses 255 to keep things in register) and apply the gamma
     for (var i=0; i<packet.length; i++) {
-      packet[i] = Math.min(254, gammaTable[packet[i]]);
+      if (correctGamma)
+        packet[i] = gammaTable[packet[i]];
+      packet[i] = Math.min(254, packet[i]);
     }
     packet.push(255); // add the termination
   }
@@ -207,7 +215,7 @@ LEDs.prototype.sendData = function(packet) {
 LEDs.prototype.update = function() {
   this.count++;
   // write the image to disk
-  if (this.count % updateImageInterval == 0) {
+  if (updateImageInterval != 0 && this.count % updateImageInterval == 0) {
     this.updateImage();
   }
 
