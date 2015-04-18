@@ -1,8 +1,13 @@
 //// Node.js server ////
 
+// var agent = require('webkit-devtools-agent');
+// agent.start()
+require('look').start();
+
 var patterns = require('./patterns.js');
 var alienblob = require('./alienblob.js');
 var bzr = require('./bzr.js');
+var off = require('./off.js');
 var leds = require('./leds.js');
 var palette = require('./palette.js');
 var allBaseColors = require('./kuler.js').allBaseColors;
@@ -40,7 +45,8 @@ if (height == 1) {
              Pulse: new patterns.PulseDrawer()};
 } else {
   drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
-             Bzr: new bzr.BzrDrawer(width, height, numColors)};
+             Bzr: new bzr.BzrDrawer(width, height, numColors),
+             Off: new off.OffDrawer(width, height, numColors)};
 }
 
 

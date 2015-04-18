@@ -1,12 +1,12 @@
 function BzrDrawer(width, height, numColors) {
   this.name = "Bzr";
   this.colorIndex = 0;
-  this.values = {speed: 20, colorSpeed: 10, zoom: 70};
+  this.values = {speed: 50, colorSpeed: 10, zoom: 70};
   this.ranges = {speed: [0,100], colorSpeed: [0,100], zoom: [0,100]};
   this.speedMultiplier = 100;
   
   this.bzr = new Bzr({width:width, height:height},
-                     {width:width*2, height:height*2}, numColors);
+                     {width:width, height:height}, numColors);
 }
 
 BzrDrawer.prototype.draw = function(leds, palette) {

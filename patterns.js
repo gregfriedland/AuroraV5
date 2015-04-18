@@ -18,16 +18,23 @@ function Animator(leds, paletteMgr, drawer, fps) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
   this.drawer = drawer;
-  this.updateIntervalMicros = 1000000 / fps;
+  this.updateIntervalMillis = 1000 / fps;
 }
 
+// try to run on the desired FPS schedule
 Animator.prototype.run = function() {
   var anim = this;
-  nanoTimer.setTimeout(function() { anim.run(); }, null, 
-    Math.max(this.updateIntervalMicros, this.drawer.getDelay() * 1000).toFixed() + "u");
+  var start = new Date().getTime();
+  // nanoTimer.setTimeout(function() { anim.run(); }, null, 
+  //   Math.max(this.updateIntervalMicros, this.drawer.getDelay() * 1000).toFixed() + "u");
 
   this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
   this.leds.update()  
+
+  var elapsed = start - new Date().getTime();
+  var delay = this.updateIntervalMillis //Math.max(this.updateIntervalMicros, this.drawer.getDelay());
+  //setTimeout(function() { anim.run(); }, Math.max(0, delay - elapsed));
+  setTimeout(function() { anim.run(); }, delay);
 }
 
 Animator.prototype.getSettings = function() {
