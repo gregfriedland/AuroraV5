@@ -1,12 +1,15 @@
 // Arduino code to listen for pixel data in serial format from a PC/RaspberryPi,
 // and relay it to an LED matrix or strip
 
+#include <Metro.h>
+
 #define ADAFRUIT_MATRIX 77
 #define LED_TYPE ADAFRUIT_MATRIX // 2801 | 2811 | ADAFRUIT_MATRIX
-#define WIDTH 32
+#define WIDTH 64
 #define HEIGHT 32
 #define BLINK_PIN 13
-#define OUTPUT_FPS_INTERVAL 3000
+#define OUTPUT_FPS_INTERVAL 5000
+#define FPS 45
 
 #define p(...) Serial.print(__VA_ARGS__)
 
@@ -31,6 +34,21 @@
 #define BUFFER_SIZE 1500
 static byte buffer[BUFFER_SIZE];
 
+Metro metro = Metro(1000/FPS);
+
+
+void updateLEDs()
+{
+#if (LED_TYPE==2811)
+    leds.show();
+#elif (LED_TYPE==2801)
+    FastLED.show();
+    //memset(leds, 0, sizeof(leds));
+#elif (LED_TYPE==ADAFRUIT_MATRIX)
+    LEDS.show();
+    //memset(leds, 0, sizeof(leds));
+#endif
+}
 
 void setup() {
   pinMode(BLINK_PIN, OUTPUT);
@@ -51,13 +69,12 @@ void setup() {
   LEDS.setBrightness(255);  
 
   // FastLED disables SmartMatrix's gamma correction by default, turn it on if you like
-  pSmartMatrix->setColorCorrection(cc24);
+  //pSmartMatrix->setColorCorrection(cc24);
 
   // With gamma correction on, the 24 bit color gets stretched out over 36-bits, now
   // try enabling/disabling FastLED's dithering and see the effect
   //FastLED.setDither( 0 );
 #endif
-
 }
 
 uint32_t lastFpsOutputTime = millis();
@@ -83,24 +100,17 @@ void loop() {
   for (int i=0; i<nbytes; i++) {
     int c = (int)buffer[i];
     if (c == 255) {
-        digitalWrite(BLINK_PIN, HIGH);
-        delayMicroseconds(1000);
-        digitalWrite(BLINK_PIN, LOW);
+      digitalWrite(BLINK_PIN, HIGH);
+      delayMicroseconds(1000);
+      digitalWrite(BLINK_PIN, LOW);
 
-        //p(".");
-
-#if (LED_TYPE==2811)
-        leds.show();
-#elif (LED_TYPE==2801)
-        FastLED.show();
-        memset(leds, 0, sizeof(leds));
-#elif (LED_TYPE==ADAFRUIT_MATRIX)
-        LEDS.show();
-        memset(leds, 0, sizeof(leds));
-#endif
-
-        pix = 0;
+      if (metro.check() == 1)
+      {
+        updateLEDs();
         outputFPS();
+      }
+
+      pix = 0;
     } else {
 #if (LED_TYPE==2811)
 #elif (LED_TYPE==2801)

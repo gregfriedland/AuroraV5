@@ -5,7 +5,7 @@ var SerialPort = require("serialport").SerialPort;
 
 var updateImageInterval = 10;
 var fpsOutputMillis = 5000;
-var correctGamma = false;
+var correctGamma = true;
 
 // 256 8-bit values; gamma=2.5
 var gammaTable = [

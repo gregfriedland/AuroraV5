@@ -28,6 +28,6 @@ Version 5 of the Aurora LED wall project.
   3. `npm install`
 
 
-Issues
-1. Bzr runs at <30fps when speed is low
+Notes
+1. To get 64x32, I used [this fork of SmartMatrix](https://github.com/ncortot/SmartMatrix)
 2. Does color speed work on Bzr?

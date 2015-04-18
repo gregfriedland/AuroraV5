@@ -23,7 +23,7 @@ var path = require('path');
 
 //// Server config variables ////
 var numColors = 1024;
-var width = 32;
+var width = 64;
 var height = 32;
 var fps = 45;
 var startDrawer = 'Bzr';
@@ -75,8 +75,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 http.listen(8080, function(){
   console.log('listening on *:8080');
 });
-
-
 
 
 
