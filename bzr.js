@@ -14,7 +14,6 @@ BzrDrawer.prototype.draw = function(leds, palette) {
  
   var zoom = this.values["zoom"] / 100.0 * 70 + 30; // compress to 30-100
   var indices = this.bzr.run(numStates, zoom/100.0);
-  //console.log(indices);
   
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {

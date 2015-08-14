@@ -29,5 +29,8 @@ Version 5 of the Aurora LED wall project.
 
 
 Notes
-1. To get 64x32, I used [this fork of SmartMatrix](https://github.com/ncortot/SmartMatrix)
-2. Does color speed work on Bzr?
+1. To get it running on two side by side SmartMatrix panels for 64x32, I used [the sm3.0 branch of SmartMatrix](https://github.com/ncortot/SmartMatrix) and overclocked the Teensy 3.1 to 144Mhz
+
+Todo
+1. Get color speed working
+2. Use dithering

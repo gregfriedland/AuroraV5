@@ -2,7 +2,7 @@
 
 // var agent = require('webkit-devtools-agent');
 // agent.start()
-require('look').start();
+//require('look').start();
 
 var patterns = require('./patterns.js');
 var alienblob = require('./alienblob.js');
@@ -25,8 +25,8 @@ var path = require('path');
 var numColors = 1024;
 var width = 64;
 var height = 32;
-var fps = 45;
-var startDrawer = 'Bzr';
+var fps = 30;
+var startDrawer = 'AlienBlob';
 var layoutLeftToRight = false; // only used for serial port connections
 var device;
 if (process.argv.length > 2) {

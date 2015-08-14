@@ -147,7 +147,7 @@ LEDs.prototype.packData = function() {
       }
     }
     
-    // cap at 254 (the Teensy uses 255 to keep things in register) and apply the gamma
+    // cap at 254 (the Teensy uses 255 to denote end of packtes) and apply the gamma
     for (var i=0; i<packet.length; i++) {
       if (correctGamma)
         packet[i] = gammaTable[packet[i]];
