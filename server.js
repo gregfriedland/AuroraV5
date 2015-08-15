@@ -8,6 +8,7 @@ var patterns = require('./patterns.js');
 var alienblob = require('./alienblob.js');
 var bzr = require('./bzr.js');
 var off = require('./off.js');
+var gradient = require('./gradient.js');
 var leds = require('./leds.js');
 var palette = require('./palette.js');
 var allBaseColors = require('./kuler.js').allBaseColors;
@@ -26,7 +27,7 @@ var numColors = 1024;
 var width = 64;
 var height = 32;
 var fps = 30;
-var startDrawer = 'AlienBlob';
+var startDrawer = 'Gradient';
 var layoutLeftToRight = false; // only used for serial port connections
 var device;
 if (process.argv.length > 2) {
@@ -46,6 +47,7 @@ if (height == 1) {
 } else {
   drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
              Bzr: new bzr.BzrDrawer(width, height, numColors),
+             Gradient: new gradient.GradientDrawer(width, height, numColors),
              Off: new off.OffDrawer(width, height, numColors)};
 }
 
