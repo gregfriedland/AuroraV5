@@ -23,20 +23,30 @@ var path = require('path');
 
 
 //// Server config variables ////
-var numColors = 1024;
+
+// *** These must match settings on the Teensy ***
 var width = 64;
 var height = 32;
+var depth = 48; // bit depth: 24 or 48
+// *** End settings match ***
+
+var numColors = 1024; // colors in the gradient of each palette
 var fps = 30;
-var startDrawer = 'Gradient';
+var startDrawer = 'AlienBlob';
 var layoutLeftToRight = false; // only used for serial port connections
+
+//// End Server config variables ///
+
+
+//// Global variables ////
 var device;
 if (process.argv.length > 2) {
   device = process.argv[2];
 } else {
-  device = "/dev/ttyACM0"; // "ws://localhost:7890";
+  device = "/dev/ttyACM0"; // for direct serial access to Teensy
+  // device = "ws://localhost:7890"; // for fadecandy
 }
 
-//// Global variables ////
 var drawers;
 if (height == 1) {
   drawers = {Gradient: new patterns.GradientDrawer(),
@@ -54,7 +64,7 @@ if (height == 1) {
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-var leds = new leds.LEDs(width, height, device, layoutLeftToRight);
+var leds = new leds.LEDs(width, height, depth, device, layoutLeftToRight);
 var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer], fps);
 console.log('starting drawer ' + startDrawer);
 animator.run();

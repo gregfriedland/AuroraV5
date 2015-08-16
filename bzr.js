@@ -18,12 +18,12 @@ BzrDrawer.prototype.draw = function(leds, palette) {
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
       index = indices[x*leds.height + y] + this.colorIndex;
-      leds.rgbs[x][y] = palette.rgbs[index % palette.numColors];
+      leds.setRgb48(x, y, palette.getRgb48(index % palette.numColors))
     }
   }
   
   this.pos += this.speedMultiplier * this.values.speed / 100.0;
-  this.colorIndex++;
+  //this.colorIndex += this.colorSpeed;
 }
 
 BzrDrawer.prototype.getDelay = function() {
@@ -69,15 +69,15 @@ Bzr.prototype.randomize = function(minx, miny, maxx, maxy) {
 }
 
 Bzr.prototype.run = function(numStates, zoom) {
-  if (this.state >= numStates)
-    this.state = 0;
+  if (this.state > numStates)
+    this.state = 1;
 
   var bwidth = this.bzrDims.width;
   var bheight = this.bzrDims.height;
   var lwidth = this.ledDims.width;
   var lheight = this.ledDims.height;
 
-  if (this.state == 0) {
+  if (this.state == 1) {
     for (var x=0; x<bwidth; x++) {
       for (var y=0; y<bheight; y++) {
         var c_a=0, c_b=0, c_c=0;
@@ -93,9 +93,9 @@ Bzr.prototype.run = function(numStates, zoom) {
           }
         }
 
-        c_a /= 8.9;
-        c_b /= 8.9;
-        c_c /= 8.9;
+        c_a /= 9;
+        c_b /= 9;
+        c_c /= 9;
 
         var ind = ii + jj * bwidth + this.q * bwidth * bheight;
         this.a[ind] = Math.min(Math.max(c_a + c_a * ( c_b - c_c ), 0), 1);
@@ -115,8 +115,13 @@ Bzr.prototype.run = function(numStates, zoom) {
       var a_q = this.a[x2 + y2*bwidth + bwidth*bheight*this.q];
       
       // interpolate
-      var a_val = a_p*this.state/numStates + a_q*(numStates-this.state)/numStates;
+      var a_val = this.state * (a_p - a_q) / numStates + a_q;
+      //var a_val = a_p*this.state/numStates + a_q*(numStates-this.state)/numStates;
       this.indices[x*lheight + y] = Math.floor(a_val * (this.numColors-1));
+
+      if (x == 0 && y == 0) 
+        console.log("state=" + this.state + " numStates=" + numStates + " a_q=" + a_q + " a_p=" + a_p + " a_val=" + a_val);
+
     }
   }
 

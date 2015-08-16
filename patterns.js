@@ -67,8 +67,8 @@ function GradientDrawer() {
 GradientDrawer.prototype.draw = function(leds, palette) {
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
-      var rgb = palette.rgbs[Math.floor(((this.index + x) % leds.length) * palette.numColors / leds.length)];
-      leds.rgbs[x][y] = rgb;
+      var index = Math.floor(((this.index + x) % leds.length) * palette.numColors / leds.length);
+      leds.setRgb48(x, y, palette.getRgb48(index));
     }
   }
   
@@ -99,8 +99,8 @@ WipeDrawer.prototype.draw = function(leds, palette) {
   }
 
   var rgbIndex = Math.floor((this.ledIndex + this.colorIndex) * palette.numColors / leds.length)
-  var rgb = palette.rgbs[mod(rgbIndex, palette.numColors)];
-  leds.rgbs[this.ledIndex] = rgb;
+  for (var y = 0; y < leds.height; y++)
+    leds.setRgb48(this.ledIndex, y, palette.getRgb48(rgbIndex));
   
   this.ledIndex = mod(this.ledIndex + 1, leds.length);
 }
@@ -125,12 +125,13 @@ PulseDrawer.prototype.draw = function(leds, palette) {
   for (var l=0; l<leds.length; l++) {
     var rgbIndex = (this.index+l) * this.values.colorSpeed;
     
-    var rgb = palette.rgbs[rgbIndex % palette.numColors];
-    rgb = [Math.floor(rgb[0]*pulseVal),
-           Math.floor(rgb[1]*pulseVal),
-           Math.floor(rgb[2]*pulseVal)];
-    
-    leds.rgbs[l] = rgb;
+    var rgb48 = palette.getRgb48(rgbIndex);
+    rgb48 = [Math.floor(rgb48[0]*pulseVal),
+             Math.floor(rgb48[1]*pulseVal),
+             Math.floor(rgb48[2]*pulseVal)];
+
+    for (var y = 0; y < leds.height; y++)
+      leds.setRgb48(l, y, rgb48);
   }
   
   this.index++;
@@ -156,12 +157,18 @@ WaveDrawer.prototype.draw = function(leds, palette) {
     var waveVal = Math.sin(waveIndex / this.values.waveSize * Math.PI);
 
     var rgbIndex = (this.index+l) * this.values.colorSpeed;
+    var rgb48 = palette.getRgb48(rgbIndex);
+    rgb48 = [Math.floor(rgb48[0]*waveVal),
+             Math.floor(rgb48[1]*waveVal),
+             Math.floor(rgb48[2]*waveVal)];
+
     var rgb = palette.rgbs[rgbIndex % palette.numColors];
     var waveRgb = [Math.floor(rgb[0]*waveVal),
                    Math.floor(rgb[1]*waveVal),
                    Math.floor(rgb[2]*waveVal)];
     
-    leds.rgbs[l] = waveRgb;
+    for (var y = 0; y < leds.height; y++)
+      leds.setRgb48(l, y, rgb48);
   }
   
   this.index++;
@@ -185,7 +192,7 @@ SparkleDrawer.prototype.draw = function(leds, palette) {
   // initialize when we know how many leds there are
   if (this.sparkles.length == 0) {
     for (var i=0; i<leds.length; i++) {
-      this.sparkles.push( {state: 'off', value: 0, rgb: null} );
+      this.sparkles.push( {state: 'off', value: 0, rgb48: null} );
     }
   }
 
@@ -197,7 +204,7 @@ SparkleDrawer.prototype.draw = function(leds, palette) {
     var sparkle = this.sparkles[sparkleIndex];
     if (sparkle.state == 'off') {
       var rgbIndex = this.colorIndex * this.values.colorSpeed;
-      sparkle.rgb = palette.rgbs[rgbIndex % palette.numColors];
+      sparkle.rgb48 = palette.getRgb48(rgbIndex);
       sparkle.state = 'up';
     }
   }
@@ -208,9 +215,12 @@ SparkleDrawer.prototype.draw = function(leds, palette) {
     // set leds from sparkles
     if (sparkle.state != 'off') {
       var sparkleVal = sparkle.value/this.values.sparkleLength;
-      leds.rgbs[i] = [sparkle.rgb[0]*sparkleVal,
-                      sparkle.rgb[1]*sparkleVal,
-                      sparkle.rgb[2]*sparkleVal];
+      var rgb48 = [sparkle.rgb48[0]*sparkleVal,
+                   sparkle.rgb48[1]*sparkleVal,
+                   sparkle.rgb48[2]*sparkleVal];
+
+      for (var y = 0; y < leds.height; y++)
+        leds.setRgb48(i, y, rgb48);
     }
     
     // adjust sparkles

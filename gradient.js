@@ -15,8 +15,8 @@ GradientDrawer.prototype.draw = function(leds, palette) {
       if (this.values.shrinking)
       	index = Math.floor(x * this.colorIndex + this.pos) % palette.numColors;
       else
- 	    index = Math.floor(x * this.values.colorSpeed + this.pos) % palette.numColors;      
-      leds.rgbs[x][y] = palette.rgbs[index % palette.numColors];
+   	    index = Math.floor(x * this.values.colorSpeed + this.pos) % palette.numColors;      
+      leds.setRgb48(x, y, palette.getRgb48(index % palette.numColors))
     }
   }
   this.pos += this.speedMultiplier * this.values.speed / 100.0;
