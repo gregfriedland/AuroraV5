@@ -112,7 +112,7 @@ LEDs.prototype.packData = function() {
   } else {
     // Serial
     packet = [];
-    if (depth == 48) {
+    if (this.depth == 48) {
       for (var y=0; y<this.height; y++) {
 	for (var x=0; x<this.width; x++) {  
 	  var r = this.gammaTable[this.rgbs48[x][y][0]]; 
@@ -126,7 +126,7 @@ LEDs.prototype.packData = function() {
 	  packet.push(Math.min(254, b >> 8));
 	}
       }
-    } else if (depth == 24) {
+    } else if (this.depth == 24) {
       for (var y=0; y<this.height; y++) {
 	for (var x=0; x<this.width; x++) {  
 	  var r = this.gammaTable[this.rgbs48[x][y][0] >> 8]; 
