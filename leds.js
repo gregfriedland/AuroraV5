@@ -113,6 +113,7 @@ LEDs.prototype.packData = function() {
     // Serial
     packet = [];
     if (this.depth == 48) {
+      //console.log(this.rgbs48[0][0]);
       for (var y=0; y<this.height; y++) {
 	for (var x=0; x<this.width; x++) {  
 	  var r = this.gammaTable[this.rgbs48[x][y][0]]; 

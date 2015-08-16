@@ -18,7 +18,10 @@ BzrDrawer.prototype.draw = function(leds, palette) {
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
       index = indices[x*leds.height + y] + this.colorIndex;
-	leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
+      if (isNaN(index)) // true due to interpolation from first position
+        continue;
+      //console.log(x + " " + y + " " + index + " " + numStates + " " + zoom + " " + this.colorIndex);
+      leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
     }
   }
   

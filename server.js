@@ -32,7 +32,7 @@ var depth = 48; // bit depth: 24 or 48
 
 var numColors = 1<<12; // colors in the gradient of each palette
 var fps = 30;
-var startDrawer = 'AlienBlob';
+var startDrawer = 'Bzr';
 var layoutLeftToRight = false; // only used for serial port connections
 
 //// End Server config variables ///
