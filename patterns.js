@@ -1,6 +1,4 @@
 var extend = require('extend');
-var NanoTimer = require('nanotimer');
-var nanoTimer = new NanoTimer();
 
 
 function mod(m, n) {
