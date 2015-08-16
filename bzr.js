@@ -18,7 +18,9 @@ BzrDrawer.prototype.draw = function(leds, palette) {
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
       index = indices[x*leds.height + y] + this.colorIndex;
-      leds.setRgb48(x, y, palette.getRgb48(index % palette.numColors))
+      leds.setRgb48(x, y, palette.getRgb48(index));
+      // if ( x == 0 && y == 0)
+      //   console.log(index + " " + palette.rgbs48[index] + " " + leds.rgbs48[x][y])
     }
   }
   
@@ -119,8 +121,8 @@ Bzr.prototype.run = function(numStates, zoom) {
       //var a_val = a_p*this.state/numStates + a_q*(numStates-this.state)/numStates;
       this.indices[x*lheight + y] = Math.floor(a_val * (this.numColors-1));
 
-      if (x == 0 && y == 0) 
-        console.log("state=" + this.state + " numStates=" + numStates + " a_q=" + a_q + " a_p=" + a_p + " a_val=" + a_val);
+      // if (x == 0 && y == 0) 
+      //   console.log("state=" + this.state + " numStates=" + numStates + " a_q=" + a_q + " a_p=" + a_p + " a_val=" + a_val);
 
     }
   }

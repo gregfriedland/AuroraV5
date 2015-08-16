@@ -28,9 +28,8 @@
   #include <SmartMatrix3.h>
   const uint8_t kMatrixHeight = HEIGHT;      // known working: 16, 32
   const uint8_t kMatrixWidth = WIDTH;        // known working: 32, 64
-  const uint8_t kColorDepthRgb = DEPTH;      // known working: 24, 48
   const uint8_t kDmaBufferRows = 4;          // known working: 4
-  SMARTMATRIX_ALLOCATE_BUFFERS(kMatrixWidth, kMatrixHeight, DEPTH, DEPTH, kDmaBufferRows);
+  SMARTMATRIX_ALLOCATE_BUFFERS(kMatrixWidth, kMatrixHeight, DEPTH, 48, kDmaBufferRows);
 #endif
 
 #define BUFFER_SIZE 2500
