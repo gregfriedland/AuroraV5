@@ -18,23 +18,6 @@ function createGammaTable(gamma, numvals, maxval) {
   return table;
 }
 
-function gammaRgb48(gammaTable, depth, rgb48) {
-  if (depth == 48) {
-    if (gammaTable != null)
-      return [gammaTable[rgb48[0]], gammaTable[rgb48[1]], gammaTable[rgb48[2]]];
-    else
-      return rgb48;
-  } else if (depth == 24) {
-    var rgb24 = [rgb48[0] >> 8, rgb48[1] >> 8, rgb48[2] >> 8];
-    if (gammaTable != null)
-      return [gammaTable[rgb24[0]], gammaTable[rgb24[1]], gammaTable[rgb24[2]]];
-    else
-      return rgb24;
-  } else {
-    assert(false);
-  }
-}
-
 function LEDs(width, height, depth, device, layoutLeftToRight) {
   this.layoutLeftToRight = layoutLeftToRight;
   this.width = width;
@@ -110,25 +93,6 @@ LEDs.prototype.clear = function() {
   this.setAllRgb48([0,0,0]);
 }
 
-function getRgbBytes(depth, rgb) {
-  bytes = []
-  if (depth == 48) {
-    bytes.push(rgb[0] & 0xFF);
-    bytes.push(rgb[0] >> 8);
-    bytes.push(rgb[1] & 0xFF);
-    bytes.push(rgb[1] >> 8);
-    bytes.push(rgb[2] & 0xFF);
-    bytes.push(rgb[2] >> 8);
-  } else if (depth == 24) {
-    bytes.push(rgb[0]);
-    bytes.push(rgb[1]);
-    bytes.push(rgb[2]);
-  } else {
-    assert(false);
-  }
-  return bytes;
-}
-
 LEDs.prototype.packData = function() {
   var packet;
   if (this.socket != null) {
@@ -148,39 +112,36 @@ LEDs.prototype.packData = function() {
   } else {
     // Serial
     packet = [];
-    for (var y=0; y<this.height; y++) {
-      if ((this.layoutLeftToRight && y % 2 == 0) ||
-          (this.layoutLeftToRight && y % 2 == 1)) {
-        // flip
-        for (var x=0; x<this.width; x++) {
-          var rgb = gammaRgb48(this.gammaTable, this.depth, this.rgbs48[this.width-1-x][y]);
-          var bytes = getRgbBytes(this.depth, rgb);
-          //console.log(rgb48 + ": " + bytes);
-          for (i in bytes)
-            packet.push(bytes[i]);
-        }
-      } else {
-        // don't flip
-        for (var x=0; x<this.width; x++) {
-          var rgb = gammaRgb48(this.gammaTable, this.depth, this.rgbs48[x][y]);
-          //console.log(rgb + " " + this.rgbs48[x][y]);
-          var bytes = getRgbBytes(this.depth, rgb);
-          //console.log(rgb + ": " + bytes);
-          for (i in bytes)
-            packet.push(bytes[i]);
-        }
+    if (depth == 48) {
+      for (var y=0; y<this.height; y++) {
+	for (var x=0; x<this.width; x++) {  
+	  var r = this.gammaTable[this.rgbs48[x][y][0]]; 
+	  var g = this.gammaTable[this.rgbs48[x][y][1]]; 
+	  var b = this.gammaTable[this.rgbs48[x][y][2]]; 
+	  packet.push(Math.min(254, r & 0xFF));
+	  packet.push(Math.min(254, r >> 8));
+	  packet.push(Math.min(254, g & 0xFF));
+	  packet.push(Math.min(254, g >> 8));
+	  packet.push(Math.min(254, b & 0xFF));
+	  packet.push(Math.min(254, b >> 8));
+	}
+      }
+    } else if (depth == 24) {
+      for (var y=0; y<this.height; y++) {
+	for (var x=0; x<this.width; x++) {  
+	  var r = this.gammaTable[this.rgbs48[x][y][0] >> 8]; 
+	  var g = this.gammaTable[this.rgbs48[x][y][1] >> 8]; 
+	  var b = this.gammaTable[this.rgbs48[x][y][2] >> 8]; 
+	  packet.push(Math.min(254, r));
+          packet.push(Math.min(254, g));
+          packet.push(Math.min(254, b));
+	}
       }
     }
     
-    // cap at 254 (the Teensy uses 255 to denote end of packtes) and apply the gamma
-    for (var i=0; i<packet.length; i++) {
-      packet[i] = Math.min(254, packet[i]);
-    }
     packet.push(255); // add the termination
-    //console.log("#######" + packet.length);
   }
   
-  //console.log(packet);
   return new Buffer(packet);
 }
 

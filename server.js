@@ -2,7 +2,7 @@
 
 // var agent = require('webkit-devtools-agent');
 // agent.start()
-//require('look').start();
+// require('look').start();
 
 var patterns = require('./patterns.js');
 var alienblob = require('./alienblob.js');
@@ -30,9 +30,9 @@ var height = 32;
 var depth = 48; // bit depth: 24 or 48
 // *** End settings match ***
 
-var numColors = 1<<14; // colors in the gradient of each palette
+var numColors = 1<<12; // colors in the gradient of each palette
 var fps = 30;
-var startDrawer = 'Bzr';
+var startDrawer = 'AlienBlob';
 var layoutLeftToRight = false; // only used for serial port connections
 
 //// End Server config variables ///

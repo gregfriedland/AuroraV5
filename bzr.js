@@ -18,9 +18,7 @@ BzrDrawer.prototype.draw = function(leds, palette) {
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
       index = indices[x*leds.height + y] + this.colorIndex;
-      leds.setRgb48(x, y, palette.getRgb48(index));
-      // if ( x == 0 && y == 0)
-      //   console.log(index + " " + palette.rgbs48[index] + " " + leds.rgbs48[x][y])
+	leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
     }
   }
   
