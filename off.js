@@ -13,6 +13,9 @@ OffDrawer.prototype.getDelay = function() {
 OffDrawer.prototype.reset = function() {
 }
 
+OffDrawer.prototype.type = function() {
+  return "1D/2D";
+}
 
 module.exports.OffDrawer = OffDrawer;
 

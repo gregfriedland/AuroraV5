@@ -49,25 +49,31 @@ if (process.argv.length > 2) {
   // device = "ws://localhost:7890"; // for fadecandy
 }
 
-var drawers;
-if (HEIGHT == 1) {
-  drawers = {Gradient: new drawers1D.GradientDrawer(),
-             Wipe: new drawers1D.WipeDrawer(),
-             Wave: new drawers1D.WaveDrawer(),
-             Sparkle: new drawers1D.SparkleDrawer(),
-             Pulse: new drawers1D.PulseDrawer()};
-} else {
-  drawers = {AlienBlob: new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
-             Bzr: new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
-             Gradient: new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
-             Off: new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)};
-}
+var allDrawers = 
+  [new drawers1D.GradientDrawer(), 
+   new drawers1D.WipeDrawer(),
+   new drawers1D.WaveDrawer(),
+   new drawers1D.SparkleDrawer(),
+   new drawers1D.PulseDrawer(),
+   new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
+   new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
+   // new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
+   new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)
+  ];
 
+var availableDrawers = {};  // drawers that can be selected from the UI
+for (var i = 0; i < allDrawers.length; i++) {
+  if ((HEIGHT == 1 && allDrawers[i].type().indexOf("1D") > -1) ||
+      (HEIGHT > 1 && allDrawers[i].type().indexOf("2D") > -1)) {
+    availableDrawers[allDrawers[i].name] = allDrawers[i];
+  }
+}
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
 var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
-var control = new controller.Controller(leds, paletteMgr, drawers, START_DRAWER, DRAWER_CHANGE_INTERVAL);
+var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
+  START_DRAWER, DRAWER_CHANGE_INTERVAL);
 
 function loop() {  
   setTimeout(function() { loop(); }, 1000 / FPS);
@@ -101,15 +107,14 @@ io.sockets.on('connection', function (socket) {
     console.log('get drawers: ' + JSON.stringify(data));
     var settings = control.getSettings();
     fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
-        allNames: Object.keys(drawers)});
+        allNames: Object.keys(availableDrawers)});
   });
 
   // set the running program, return it's settings
   // plus the palette
   socket.on('set drawer', function (drawerName, fn) {
     console.log('set drawer: ' + drawerName);
-    control.currDrawer = drawers[drawerName];
-    control.currDrawer.reset()
+    control.changeDrawer(availableDrawers[drawerName]);
     var settings = control.getSettings();
     fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
   });
@@ -125,7 +130,6 @@ io.sockets.on('connection', function (socket) {
   socket.on('randomize settings', function (data, fn) {
     console.log('randomize settings: ' + data);
     control.randomizeSettings();
-    control.currDrawer.reset()
     fn(control.getSettings().values);
   });
 });

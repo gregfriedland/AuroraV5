@@ -33,6 +33,9 @@ AlienBlobDrawer.prototype.getDelay = function() {
   return 1000/this.values.speed;
 }
 
+AlienBlobDrawer.prototype.type = function() {
+  return "2D";
+}
 
 
 function AlienBlob(width, height, numColors) {

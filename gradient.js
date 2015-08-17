@@ -30,6 +30,9 @@ GradientDrawer.prototype.getDelay = function() {
 GradientDrawer.prototype.reset = function() {
 }
 
+GradientDrawer.prototype.type = function() {
+  return "2D";
+}
 
 module.exports.GradientDrawer = GradientDrawer;
 

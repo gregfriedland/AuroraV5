@@ -37,6 +37,9 @@ BzrDrawer.prototype.reset = function() {
   this.bzr.randomize(0, 0, this.bzr.bzrDims.width, this.bzr.bzrDims.height);
 }
 
+BzrDrawer.prototype.type = function() {
+  return "2D";
+}
 
 
 function Bzr(ledDims, bzrDims, numColors) {

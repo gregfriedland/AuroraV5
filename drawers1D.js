@@ -2,11 +2,6 @@ function mod(m, n) {
   return ((m % n) + n) % n;
 }
 
-function randomInt (low, high) {
-  return Math.floor(Math.random() * (high - low) + low);
-}
-
-
 function GradientDrawer() {
   this.name = "Gradient";
   this.index = 0;
@@ -29,6 +24,9 @@ GradientDrawer.prototype.getDelay = function() {
   return 1000/this.values.speed;
 }
 
+GradientDrawer.prototype.type = function() {
+  return "1D";
+}
 
 
 // wipe a color from one side to the next
@@ -57,6 +55,10 @@ WipeDrawer.prototype.draw = function(leds, palette) {
 
 WipeDrawer.prototype.getDelay = function() {
   return 1000/this.values.wipeSpeed;
+}
+
+WipeDrawer.prototype.type = function() {
+  return "1D";
 }
 
 
@@ -89,6 +91,10 @@ PulseDrawer.prototype.draw = function(leds, palette) {
 
 PulseDrawer.prototype.getDelay = function() {
   return 1000/this.values.pulseSpeed;
+}
+
+PulseDrawer.prototype.type = function() {
+  return "1D";
 }
 
 
@@ -128,6 +134,9 @@ WaveDrawer.prototype.getDelay = function() {
   return 1000/this.values.waveSpeed;
 }
 
+WaveDrawer.prototype.type = function() {
+  return "1D";
+}
 
 
 function SparkleDrawer() {
@@ -190,6 +199,9 @@ SparkleDrawer.prototype.getDelay = function() {
   return 1000/this.values.sparkleSpeed;
 }
 
+SparkleDrawer.prototype.type = function() {
+  return "1D";
+}
 
 
 
