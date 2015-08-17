@@ -19,11 +19,7 @@ function Animator(leds, paletteMgr, drawer, fps) {
   this.updateIntervalMillis = Math.round(1000 / fps);
 }
 
-// try to run on the desired FPS schedule
-Animator.prototype.run = function() {
-  var anim = this;
-  setTimeout(function() { anim.run(); }, this.updateIntervalMillis);
-
+Animator.prototype.loop = function() {
   this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
   this.leds.update()  
 }

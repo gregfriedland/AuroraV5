@@ -8,7 +8,7 @@
 #define DEPTH 48 // 24 or 48bit
 #define BLINK_PIN 13
 #define OUTPUT_FPS_INTERVAL 5000
-#define FPS 30
+#define FPS 60
 
 #define p(...) Serial.print(__VA_ARGS__)
 

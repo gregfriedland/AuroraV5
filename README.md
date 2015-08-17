@@ -38,6 +38,10 @@ Version 5 of the Aurora LED wall project.
     3. `cp AuroraV5/system/fcserver-init.d /etc/init.d/fcserver`
     4. `chmod 755 /etc/init.d/fcserver`
 
+6. Optional for Rasperry Pi
+  1. Comment out this line in node_modules/serialport/serialport.js which is slowing things down: `//debug('Write: '+JSON.stringify(buffer));`
+
+
 Notes
 1. To get it running on two side by side SmartMatrix panels for 64x32, I used [the rgb48 branch of my SmartMatrix fork](https://github.com/gregfriedland/SmartMatrix) and overclocked the Teensy 3.1 to 144Mhz.
 

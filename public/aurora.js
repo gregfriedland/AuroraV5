@@ -15,7 +15,11 @@ socket.on('connect', function () {
   console.log('connected');
   
   emit(socket, 'get drawers', null, function (data) {
-    createProgramsUI(socket, data.active, data.all);
+    createProgramsUI(socket, data.active.name, data.allNames);
+    settingNames = Object.keys(data.active.values);
+    createSettingsUI(socket, data.active.ranges);
+    updateSettingsUI(socket, data.active.values);
+
   });
 });
 
@@ -52,11 +56,10 @@ function createProgramsUI(socket, activeProgram, programs) {
                           {program:programs[i]},
                           function(event) {
                             event.preventDefault();
+                            setProgram(event.data.program);
                             createProgramsUI(socket, event.data.program, programs);
                           });
   }
-
-  setProgram(activeProgram);
 }
 
 

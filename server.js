@@ -67,9 +67,12 @@ var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
 var leds = new leds.LEDs(width, height, depth, device, layoutLeftToRight);
 var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer], fps);
 console.log('starting drawer ' + startDrawer);
-animator.run();
 
-
+function loop() {  
+  setTimeout(function() { loop(); }, 1000 / fps);
+  animator.loop();
+}
+loop();
 
 //// Start the http server ///
 app.get('/', function(req, res) {
@@ -95,7 +98,9 @@ io.sockets.on('connection', function (socket) {
   // get the allowed programs
   socket.on('get drawers', function (data, fn) {
     console.log('get drawers: ' + JSON.stringify(data));
-    fn({active: animator.drawer.name, all: Object.keys(drawers)});
+    var settings = animator.getSettings();
+    fn({active: {name: animator.drawer.name, ranges: settings.ranges, values: settings.values},
+        allNames: Object.keys(drawers)});
   });
 
   // set the running program, return it's settings
