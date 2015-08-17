@@ -1,4 +1,10 @@
 var extend = require('extend');
+var facedetector = require('./facedetector.js');
+
+FACEDETECTION_CAM_SIZE = (320, 240)
+FACEDETECTION_CAM_FPS = 10
+FACEDETECTION_HISTORY_SIZE = 5 * FACEDETECTION_CAM_FPS;
+FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
 
 function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
@@ -11,6 +17,10 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
   this.currDrawer = drawers[startDrawerName];
   this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
   console.log('starting drawer ' + startDrawerName);
+
+  this.facedetector = new facedetector.FaceDetector(FACEDETECTION_CAM_SIZE, 
+    FACEDETECTION_CAM_FPS, FACEDETECTION_HISTORY_SIZE);
+  this.facedetector.start();
 }
 
 Controller.prototype.loop = function() {
@@ -24,6 +34,12 @@ Controller.prototype.loop = function() {
     this.randomizeSettings();
     this.drawerChange.lastChange = new Date().getTime();
     console.log('changing drawer randomly to ' + this.currDrawer.name);
+  } else if (this.currDrawer.name != "Off" && this.foundFaces(true)) {
+    console.log('found some faces nearby');
+    this.changeDrawer(this.drawers["Off"]);
+  } else if (this.currDrawer.name == "Off" && this.foundFaces(false)) {
+    console.log('no longer found any faces nearby');
+    this.changeDrawer(this.drawers["Bzr"]);
   }
 
   this.currDrawer.draw(this.leds, this.paletteMgr.getCurrent());
@@ -56,11 +72,12 @@ Controller.prototype.randomizeSettings = function() {
   d.reset();
 }
 
-Controller.prototype.foundHumanFace = function() {
-  return true;
+Controller.prototype.foundFaces = function(present) {
+  return this.facedetector.foundFaces(present, FACEDETECTION_SIGNAL_THRESHOLD);
 }
 
 Controller.prototype.changeDrawer = function(drawer) {
+  console.log("changing to drawer: " + drawer.name);
   this.currDrawer = drawer;
   this.currDrawer.reset()
   this.drawerChange.lastChange = new Date().getTime();
