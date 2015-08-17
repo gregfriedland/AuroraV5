@@ -1,6 +1,3 @@
-var extend = require('extend');
-
-
 function mod(m, n) {
   return ((m % n) + n) % n;
 }
@@ -8,47 +5,6 @@ function mod(m, n) {
 function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
 }
-
-
-
-
-function Animator(leds, paletteMgr, drawer, fps) {
-  this.leds = leds;
-  this.paletteMgr = paletteMgr;
-  this.drawer = drawer;
-  this.updateIntervalMillis = Math.round(1000 / fps);
-}
-
-Animator.prototype.loop = function() {
-  this.drawer.draw(this.leds, this.paletteMgr.getCurrent());
-  this.leds.update()  
-}
-
-Animator.prototype.getSettings = function() {
-  var ranges = extend({}, this.drawer.ranges,
-                      {palette: [1,this.paletteMgr.palettes.length]});
-  var values = extend({}, this.drawer.values,
-                      {palette: this.paletteMgr.currPalette});
-  return {ranges: ranges, values: values};
-}
-
-Animator.prototype.setSettings = function(settingVals) {
-  for (setting in this.drawer.values) {
-    this.drawer.values[setting] = parseInt(settingVals[setting]);
-  }
-  this.paletteMgr.setCurrentIndex(parseInt(settingVals.palette));
-}
-
-Animator.prototype.randomizeSettings = function() {
-  var d = this.drawer
-  var pm = this.paletteMgr;
-
-  for (setting in d.values) {
-    d.values[setting] = randomInt(d.ranges[setting][0], d.ranges[setting][1]+1);
-  }
-  pm.setCurrentIndex(randomInt(1,pm.palettes.length));
-}
-
 
 
 function GradientDrawer() {
@@ -237,10 +193,8 @@ SparkleDrawer.prototype.getDelay = function() {
 
 
 
-module.exports.Animator = Animator;
 module.exports.GradientDrawer = GradientDrawer;
 module.exports.WipeDrawer = WipeDrawer;
 module.exports.WaveDrawer = WaveDrawer;
 module.exports.PulseDrawer = PulseDrawer;
 module.exports.SparkleDrawer = SparkleDrawer;
-

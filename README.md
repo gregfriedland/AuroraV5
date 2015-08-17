@@ -46,4 +46,5 @@ Notes
 1. To get it running on two side by side SmartMatrix panels for 64x32, I used [the rgb48 branch of my SmartMatrix fork](https://github.com/gregfriedland/SmartMatrix) and overclocked the Teensy 3.1 to 144Mhz.
 
 Work in progress
+1. Trigger program with opencv face detection
 1. Get color speed working

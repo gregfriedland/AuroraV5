@@ -4,7 +4,8 @@
 // agent.start()
 // require('look').start();
 
-var patterns = require('./patterns.js');
+var controller = require('./controller.js');
+var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
 var bzr = require('./bzr.js');
 var off = require('./off.js');
@@ -25,14 +26,14 @@ var path = require('path');
 //// Server config variables ////
 
 // *** These must match settings on the Teensy ***
-var width = 64;
-var height = 32;
-var depth = 48; // bit depth: 24 or 48
+var WIDTH = 64;
+var HEIGHT = 32;
+var DEPTH = 48; // bit depth: 24 or 48
 // *** End settings match ***
 
-var numColors = 1<<12; // colors in the gradient of each palette
-var fps = 30;
-var startDrawer = 'Bzr';
+var NUM_COLORS = 1<<12; // colors in the gradient of each palette
+var FPS = 30;
+var START_DRAWER = 'Bzr';
 var layoutLeftToRight = false; // only used for serial port connections
 
 //// End Server config variables ///
@@ -48,29 +49,28 @@ if (process.argv.length > 2) {
 }
 
 var drawers;
-if (height == 1) {
-  drawers = {Gradient: new patterns.GradientDrawer(),
-             Wipe: new patterns.WipeDrawer(),
-             Wave: new patterns.WaveDrawer(),
-             Sparkle: new patterns.SparkleDrawer(),
-             Pulse: new patterns.PulseDrawer()};
+if (HEIGHT == 1) {
+  drawers = {Gradient: new drawers1D.GradientDrawer(),
+             Wipe: new drawers1D.WipeDrawer(),
+             Wave: new drawers1D.WaveDrawer(),
+             Sparkle: new drawers1D.SparkleDrawer(),
+             Pulse: new drawers1D.PulseDrawer()};
 } else {
-  drawers = {AlienBlob: new alienblob.AlienBlobDrawer(width, height, numColors),
-             Bzr: new bzr.BzrDrawer(width, height, numColors),
-             Gradient: new gradient.GradientDrawer(width, height, numColors),
-             Off: new off.OffDrawer(width, height, numColors)};
+  drawers = {AlienBlob: new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
+             Bzr: new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
+             Gradient: new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
+             Off: new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)};
 }
 
 
 //// Start the patterns ////
-var paletteMgr = new palette.PaletteManager(allBaseColors, numColors);
-var leds = new leds.LEDs(width, height, depth, device, layoutLeftToRight);
-var animator = new patterns.Animator(leds, paletteMgr, drawers[startDrawer], fps);
-console.log('starting drawer ' + startDrawer);
+var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
+var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
+var control = new controller.Controller(leds, paletteMgr, drawers, START_DRAWER);
 
 function loop() {  
-  setTimeout(function() { loop(); }, 1000 / fps);
-  animator.loop();
+  setTimeout(function() { loop(); }, 1000 / FPS);
+  control.loop();
 }
 loop();
 
@@ -98,8 +98,8 @@ io.sockets.on('connection', function (socket) {
   // get the allowed programs
   socket.on('get drawers', function (data, fn) {
     console.log('get drawers: ' + JSON.stringify(data));
-    var settings = animator.getSettings();
-    fn({active: {name: animator.drawer.name, ranges: settings.ranges, values: settings.values},
+    var settings = control.getSettings();
+    fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
         allNames: Object.keys(drawers)});
   });
 
@@ -107,25 +107,25 @@ io.sockets.on('connection', function (socket) {
   // plus the palette
   socket.on('set drawer', function (drawerName, fn) {
     console.log('set drawer: ' + drawerName);
-    animator.drawer = drawers[drawerName];
-    animator.drawer.reset()
-    var settings = animator.getSettings();
+    control.currDrawer = drawers[drawerName];
+    control.currDrawer.reset()
+    var settings = control.getSettings();
     fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
   });
 
   // update the settings on the server
   socket.on('set settings', function (settingVals, fn) {
     console.log('set settings: ' + JSON.stringify(settingVals));
-    animator.setSettings(settingVals);
+    control.setSettings(settingVals);
     //fn();
   });
 
   // randomize the settings on the server
   socket.on('randomize settings', function (data, fn) {
     console.log('randomize settings: ' + data);
-    animator.randomizeSettings();
-    animator.drawer.reset()
-    fn(animator.getSettings().values);
+    control.randomizeSettings();
+    control.currDrawer.reset()
+    fn(control.getSettings().values);
   });
 });
 
