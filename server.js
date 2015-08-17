@@ -34,6 +34,7 @@ var DEPTH = 48; // bit depth: 24 or 48
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
 var FPS = 30;
 var START_DRAWER = 'Bzr';
+var DRAWER_CHANGE_INTERVAL = 5000;
 var layoutLeftToRight = false; // only used for serial port connections
 
 //// End Server config variables ///
@@ -66,7 +67,7 @@ if (HEIGHT == 1) {
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
 var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
-var control = new controller.Controller(leds, paletteMgr, drawers, START_DRAWER);
+var control = new controller.Controller(leds, paletteMgr, drawers, START_DRAWER, DRAWER_CHANGE_INTERVAL);
 
 function loop() {  
   setTimeout(function() { loop(); }, 1000 / FPS);

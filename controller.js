@@ -1,14 +1,22 @@
 var extend = require('extend');
 
-function Controller(leds, paletteMgr, drawers, startDrawerName) {
+function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInterval) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
-  this.currDrawers = drawers;
+  this.drawers = drawers;
   this.currDrawer = drawers[startDrawerName];
+  this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
   console.log('starting drawer ' + startDrawerName);
 }
 
 Controller.prototype.loop = function() {
+  if (new Date().getTime() - this.drawerChange.lastChange > this.drawerChange.interval) {
+    // change the drawer every so often to keep things interesting
+    var drawerNames = Object.keys(this.drawers);
+    var newDrawerName = drawerNames[Math.floor(Math.random() * drawerNames.length)];
+    this.currDrawer = this.drawers[newDrawerName];
+  }
+  
   this.currDrawer.draw(this.leds, this.paletteMgr.getCurrent());
   this.leds.update()  
 }
