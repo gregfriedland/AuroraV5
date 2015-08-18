@@ -1,26 +1,26 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
 
-FACEDETECTION_CAM_SIZE = (320, 240)
-FACEDETECTION_CAM_FPS = 10
-FACEDETECTION_HISTORY_SIZE = 5 * FACEDETECTION_CAM_FPS;
-FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
+var FACEDETECTION_FPS = 10
+var FACEDETECTION_HISTORY_SIZE = 5 * FACEDETECTION_FPS;
+var FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
 
 function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
 }
 
-function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInterval) {
+function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInterval, cam) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
   this.drawers = drawers;
   this.currDrawer = drawers[startDrawerName];
   this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
+  this.cam = cam;
   console.log('starting drawer ' + startDrawerName);
 
-  this.facedetector = new facedetector.FaceDetector(FACEDETECTION_CAM_SIZE, 
-    FACEDETECTION_CAM_FPS, FACEDETECTION_HISTORY_SIZE);
-  this.facedetector.start();
+  this.facedetector = new facedetector.FaceDetector(cam, 
+    FACEDETECTION_HISTORY_SIZE);
+  this.facedetector.start(FACEDETECTION_FPS);
 }
 
 Controller.prototype.loop = function() {
@@ -34,12 +34,12 @@ Controller.prototype.loop = function() {
     this.randomizeSettings();
     this.drawerChange.lastChange = new Date().getTime();
     console.log('changing drawer randomly to ' + this.currDrawer.name);
-  } else if (this.currDrawer.name != "Off" && this.foundFaces(true)) {
-    console.log('found some faces nearby');
-    this.changeDrawer(this.drawers["Off"]);
-  } else if (this.currDrawer.name == "Off" && this.foundFaces(false)) {
-    console.log('no longer found any faces nearby');
-    this.changeDrawer(this.drawers["Bzr"]);
+  // } else if (this.currDrawer.name != "Off" && this.foundFaces(true)) {
+  //   console.log('found some faces nearby');
+  //   this.changeDrawer(this.drawers["Off"]);
+  // } else if (this.currDrawer.name == "Off" && this.foundFaces(false)) {
+  //   console.log('no longer found any faces nearby');
+  //   this.changeDrawer(this.drawers["Bzr"]);
   }
 
   this.currDrawer.draw(this.leds, this.paletteMgr.getCurrent());

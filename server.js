@@ -8,10 +8,12 @@ var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
 var bzr = require('./bzr.js');
+var video = require('./video.js');
 var off = require('./off.js');
 var gradient = require('./gradient.js');
 var leds = require('./leds.js');
 var palette = require('./palette.js');
+var camera = require('./camera.js');
 var allBaseColors = require('./kuler.js').allBaseColors;
 
 var fs = require('fs');
@@ -33,8 +35,9 @@ var DEPTH = 48; // bit depth: 24 or 48
 
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
 var FPS = 30;
-var START_DRAWER = 'Bzr';
-var DRAWER_CHANGE_INTERVAL = 5000;
+var START_DRAWER = 'Video';
+var DRAWER_CHANGE_INTERVAL = 60000;
+var CAM_SIZE = (320, 240)
 var layoutLeftToRight = false; // only used for serial port connections
 
 //// End Server config variables ///
@@ -49,6 +52,10 @@ if (process.argv.length > 2) {
   // device = "ws://localhost:7890"; // for fadecandy
 }
 
+// start the camera used by face detection and the VideoDrawer
+var cam = new camera.Camera(CAM_SIZE);
+cam.start(FPS);
+
 var allDrawers = 
   [new drawers1D.GradientDrawer(), 
    new drawers1D.WipeDrawer(),
@@ -57,6 +64,7 @@ var allDrawers =
    new drawers1D.PulseDrawer(),
    new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
    new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
+   new video.VideoDrawer(WIDTH, HEIGHT, NUM_COLORS, cam),
    // new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
    new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)
   ];
@@ -73,7 +81,7 @@ for (var i = 0; i < allDrawers.length; i++) {
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
 var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
-  START_DRAWER, DRAWER_CHANGE_INTERVAL);
+  START_DRAWER, DRAWER_CHANGE_INTERVAL, cam);
 
 function loop() {  
   setTimeout(function() { loop(); }, 1000 / FPS);
