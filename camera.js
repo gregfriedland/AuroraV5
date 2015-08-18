@@ -23,7 +23,7 @@ Camera.prototype.start = function(fps) {
 			    if (im.empty()) {
 			      console.log("empty image");
 			    } else {
-			      console.log("read image");
+			      //console.log("read image");
 			      instance.image = im.clone();
 			    }
 			    release();
