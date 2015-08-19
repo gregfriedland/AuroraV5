@@ -6,6 +6,7 @@ function AlienBlobDrawer(width, height, numColors) {
   this.ranges = {speed: [0,100], colorSpeed: [0,100], detail: [1,4], zoom: [0,100]};
   this.decay = 0.5;
   this.speedMultiplier = 0.07;
+  this.colorShift = 0;
   
   this.alienblob = new AlienBlob(width, height, numColors);
 }
@@ -20,13 +21,13 @@ AlienBlobDrawer.prototype.draw = function(leds, palette) {
   
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
-      index = indices[x*leds.height + y] + this.colorIndex;
+      index = Math.floor(indices[x*leds.height + y] + this.colorIndex + this.colorShift * palette.numColors);
       leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
     }
   }
   
   this.pos += this.speedMultiplier * this.values.speed / 100.0;
-  this.colorIndex++;
+  //this.colorIndex++;
 }
 
 AlienBlobDrawer.prototype.getDelay = function() {
