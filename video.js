@@ -7,7 +7,8 @@ function VideoDrawer(width, height, numColors, cam) {
 }
 
 VideoDrawer.prototype.draw = function(leds, palette) {
-    var instance = this;    
+    var instance = this;
+    instance.palette = palette;
     if (this.cam.getImage() != null) {
         this.cam.getLock().readLock(function (release) {
             var img = instance.cam.getImage().clone();
@@ -16,9 +17,8 @@ VideoDrawer.prototype.draw = function(leds, palette) {
             for (var x=0; x<leds.width; x++) {
                 for (var y=0; y<leds.height; y++) {
                     var rgb = img.pixel(y,x);
-                    var index = Math.floor((rgb[0] + rgb[1] + rgb[2]) * palette.numColors / (256*3));
-                    leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
-                    //leds.rgbs48[x][y] = [rgb[0] << 8, rgb[1] << 8, rgb[2] << 8];
+                    var index = Math.floor((rgb[0] + rgb[1] + rgb[2]) * instance.palette.numColors / (256*3));
+                    leds.rgbs48[x][y] = instance.palette.rgbs48[index % instance.palette.numColors];
                 }
               }
 

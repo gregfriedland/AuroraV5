@@ -1,3 +1,5 @@
+// similar to setInterval() but only schedules the next instace
+// when the current one has finished running
 function SafeInterval(func, interval) {
 	this.running = true;
 

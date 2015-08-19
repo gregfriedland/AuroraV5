@@ -13,12 +13,12 @@ FaceDetector.prototype.start = function(fps) {
 	  	instance.cam.getLock().readLock(function (release) {
 		    instance.cam.getImage().detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', {}, function(err, faces) {
 		      if (err) throw err;
-		      // console.log("    face detection");
-	      	  // facedetector.history.data[facedetector.history.index] = faces.length > 0;
-	    	  // facedetector.history.index = (facedetector.history.index+1) % facedetector.history.data.length;
-	          // facedetector.lastFaces = faces;
+		      //console.log("  face detection");
+	      	  instance.history.data[instance.history.index] = faces.length > 0;
+	    	  instance.history.index = (instance.history.index+1) % instance.history.data.length;
+	          instance.lastFaces = faces;
 	          // if (faces.length > 0)
-	          // 	  console.log("  detected " + faces.length + " faces");
+	          // 	  console.log("    detected " + faces.length + " faces");
 	          release();
 		    });
 		});
@@ -29,19 +29,17 @@ FaceDetector.prototype.start = function(fps) {
 }
 
 FaceDetector.prototype.stop = function() {
-	if (this.intervalId != null)
-		clearInterval(this.intervalId);
-	this.intervalId = null;
+	this.repeater.stop();
 	console.log("stopping face detection");
 }
 
 // are we currently looking at a face?
 // signalThreshold is the percent of our stored history that matches a face
-// FaceDetector.prototype.foundFaces = function(present, signalThreshold) {
-// 	var foundCount = this.history.data.filter(function(b) 
-// 		{ if ((b == true && present) || (b == false && !present)) return 1; }).length;
-// 	// console.log(present + " " + foundCount);
-// 	return (foundCount / this.history.data.length >= signalThreshold);
-// }
+FaceDetector.prototype.foundFaces = function(present, signalThreshold) {
+	var foundCount = this.history.data.filter(function(b) 
+		{ return ((b == true && present) || (b == false && !present)); }).length;
+	// console.log(present + " " + foundCount);
+	return (foundCount / this.history.data.length >= signalThreshold);
+}
 
 module.exports.FaceDetector = FaceDetector;
