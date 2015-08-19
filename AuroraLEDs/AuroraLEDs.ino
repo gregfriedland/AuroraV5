@@ -8,7 +8,7 @@
 #define DEPTH 48 // 24 or 48bit
 #define BLINK_PIN 13
 #define OUTPUT_FPS_INTERVAL 5000
-#define FPS 60
+#define FPS 30
 
 #define p(...) Serial.print(__VA_ARGS__)
 
@@ -85,15 +85,15 @@ void outputFPS() {
     int32_t fps = fpsOutputCount * 1000UL / fpsOutputTimeDiff;
     p(fps);
 
-#if (LED_TYPE==ADAFRUIT_MATRIX)
-    char value[] = "00";
-    value[0] = '0' + fps / 100;
-    value[1] = '0' + (fps % 100) / 10;
-    value[2] = '0' + fps % 10;    
-    matrix.drawForegroundString(12, matrix.getScreenHeight()-1 -5, value, true);
-    matrix.displayForegroundDrawing();
-    matrix.clearForeground();
-#endif
+// #if (LED_TYPE==ADAFRUIT_MATRIX)
+//     char value[] = "00";
+//     value[0] = '0' + fps / 100;
+//     value[1] = '0' + (fps % 100) / 10;
+//     value[2] = '0' + fps % 10;    
+//     matrix.drawForegroundString(12, matrix.getScreenHeight()-1 -5, value, true);
+//     matrix.displayForegroundDrawing();
+//     matrix.clearForeground();
+// #endif
     fpsOutputCount = 0;
     lastFpsOutputTime = millis();
   }
