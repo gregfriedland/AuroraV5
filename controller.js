@@ -5,7 +5,6 @@ var coreAudio = require("node-core-audio");
 var FACEDETECTION_FPS = 10
 var FACEDETECTION_HISTORY_SIZE = 3 * FACEDETECTION_FPS;
 var FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
-var AUDIO_SENSITIVITY = 2;
 
 function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
@@ -19,7 +18,7 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
   this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
   this.cam = cam;
   audioEngine = coreAudio.createNewAudioEngine();
-  audioEngine.setOptions({sampleRate: 44100, framesPerBuffer: 512, inputChannels: 1, outputChannels: 1})
+  audioEngine.setOptions({sampleRate: 11025, framesPerBuffer: 512, inputChannels: 1, outputChannels: 1})
 
   var instance = this;
   audioEngine.addAudioCallback( function(buffer) { return instance.processAudio(buffer); });
@@ -32,9 +31,11 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
 }
 
 Controller.prototype.processAudio = function(buffer) {
-  var ss = buffer[0].map(function (n) { return Math.pow(n,2); }).reduce(function (sum,n) { return sum+n; });
-  //console.log("processAudio: " + ss);
-  this.currDrawer.colorShift = ss * AUDIO_SENSITIVITY;
+  var ss = 0;
+  for (var i = 0; i < buffer[0].length; i++)
+    ss += buffer[0][i] * buffer[0][i];
+  //console.log("processAudio: " + ss.toFixed(7));
+  this.currDrawer.colorShift = ss;
   return buffer;
 }
 
