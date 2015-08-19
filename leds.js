@@ -3,7 +3,7 @@ var fs = require('fs');
 var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
-var updateImageInterval = 10;
+var updateImageInterval = 3;
 var fpsOutputMillis = 5000;
 var GAMMA = 4;
 
@@ -146,6 +146,7 @@ LEDs.prototype.packData = function() {
   return new Buffer(packet);
 }
 
+// update the internal png
 LEDs.prototype.updateImage = function() {
   var png = new PNG({width: this.width, height: this.height});
 
@@ -200,7 +201,6 @@ LEDs.prototype.sendData = function(packet) {
 
 LEDs.prototype.update = function() {
   this.count++;
-  // write the image to disk
   if (updateImageInterval != 0 && this.count % updateImageInterval == 0) {
     this.updateImage();
   }

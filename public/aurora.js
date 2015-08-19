@@ -159,7 +159,7 @@ function updateImage() {
       }});
       
   // run again if we haven't failed a bunch of times in a row
-  if (fails < 10) setTimeout(updateImage, 200);
+  if (fails < 10) setTimeout(updateImage, 100);
 }
 updateImage();
 

@@ -14,6 +14,7 @@ function Camera(size) {
 }
 
 Camera.prototype.start = function(fps) {
+	console.log("starting camera");
 	var instance = this;
 	this.repeater = new SafeInterval(function() {
 		instance.lock.writeLock(function (release) {
@@ -30,7 +31,6 @@ Camera.prototype.start = function(fps) {
 			});
 		});
 	}, 1000 / fps);
-	console.log("starting camera");
 }
 
 Camera.prototype.stop = function(fps) {

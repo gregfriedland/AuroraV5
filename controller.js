@@ -35,7 +35,7 @@ Controller.prototype.processAudio = function(buffer) {
   for (var i = 0; i < buffer[0].length; i++)
     ss += buffer[0][i] * buffer[0][i];
   //console.log("processAudio: " + ss.toFixed(7));
-  this.currDrawer.colorShift = ss;
+  this.currDrawer.setAudioLevel(ss);
   return buffer;
 }
 

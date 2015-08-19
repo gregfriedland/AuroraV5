@@ -2,13 +2,13 @@ function AlienBlobDrawer(width, height, numColors) {
   this.name = "AlienBlob";
   this.pos = Math.floor(Math.random() * 1e6);
   this.colorIndex = 0;
-  this.values = {speed: 3, colorSpeed: 10, detail: 3, zoom: 70, 
+  this.values = {speed: 3, colorSpeed: 0, detail: 3, zoom: 70, 
     audioSensitivity: 10, maxAudioShift: 10};
   this.ranges = {speed: [0,100], colorSpeed: [0,100], detail: [1,4], zoom: [0,100], 
     audioSensitivity: [0,100], maxAudioShift: [0,100]};
   this.decay = 0.5;
   this.speedMultiplier = 0.07;
-  this.colorShift = 0;
+  this.audioLevel = 0;
   
   this.alienblob = new AlienBlob(width, height, numColors);
 }
@@ -21,10 +21,11 @@ AlienBlobDrawer.prototype.reset = function() {
 AlienBlobDrawer.prototype.draw = function(leds, palette) {
   var indices = this.alienblob.run(this.pos, this.values["zoom"]/100.0, this.values["detail"], this.decay);
   
+  var audioIndex = this.audioLevel * palette.numColors * this.values.audioSensitivity / 100;
+  audioIndex = Math.min(audioIndex, this.values.maxAudioShift * palette.numColors / 100);
+
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
-      var audioIndex = this.colorShift * palette.numColors * this.values.audioSensitivity / 100;
-      audioIndex = Math.min(audioIndex, this.values.maxAudioShift * palette.numColors / 100);
       index = Math.floor(indices[x*leds.height + y] + this.colorIndex + audioIndex);
         
       leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
@@ -32,11 +33,11 @@ AlienBlobDrawer.prototype.draw = function(leds, palette) {
   }
   
   this.pos += this.speedMultiplier * this.values.speed / 100.0;
-  //this.colorIndex++;
+  this.colorIndex += this.values.colorSpeed;
 }
 
-AlienBlobDrawer.prototype.getDelay = function() {
-  return 1000/this.values.speed;
+AlienBlobDrawer.prototype.setAudioLevel = function(level) {
+  this.audioLevel = level;
 }
 
 AlienBlobDrawer.prototype.type = function() {
