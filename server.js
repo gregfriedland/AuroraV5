@@ -56,6 +56,9 @@ if (process.argv.length > 2) {
 var cam = new camera.Camera(CAM_SIZE);
 cam.start(FPS);
 
+// cv can use a lot of memory unless we garbage collect often
+setInterval(function() { console.log("collecting garbage"); global.gc(); }, 10000);
+
 var allDrawers = 
   [new drawers1D.GradientDrawer(), 
    new drawers1D.WipeDrawer(),
