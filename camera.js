@@ -15,11 +15,13 @@ function Camera(size) {
 
 Camera.prototype.start = function(fps) {
 	console.log("starting camera");
+    fpsInfo = {count: 0, lastTime: new Date().getTime(), outputInterval: 5000};
+
 	var instance = this;
 	this.repeater = new SafeInterval(function() {
 		instance.lock.writeLock(function (release) {
 			instance.cam.read(function(err, im) {
-			    if (err) throw err;
+  			    if (err) throw err;
 
 			    if (im.empty()) {
 			      console.log("empty image");
@@ -27,6 +29,15 @@ Camera.prototype.start = function(fps) {
 			      //console.log("read image");
 			      instance.image = im.clone();
 			    }
+
+                // keep track of effective camera fps
+                var currTime = new Date().getTime();
+                if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
+                    console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
+                    fpsInfo = {count: 0, lastTime: currTime, outputInterval: fpsInfo.outputInterval};
+                }
+                fpsInfo.count++;
+
 			    release();
 			});
 		});

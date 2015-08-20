@@ -5,6 +5,7 @@ var coreAudio = require("node-core-audio");
 var FACEDETECTION_FPS = 10
 var FACEDETECTION_HISTORY_SIZE = 3 * FACEDETECTION_FPS;
 var FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
+var AUDIO_LEVEL_HISTORY = 30;
 
 function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
@@ -22,6 +23,7 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
 
   var instance = this;
   audioEngine.addAudioCallback( function(buffer) { return instance.processAudio(buffer); });
+  this.audioLevel = 0;
 
   console.log('starting drawer ' + startDrawerName);
 
@@ -35,7 +37,9 @@ Controller.prototype.processAudio = function(buffer) {
   for (var i = 0; i < buffer[0].length; i++)
     ss += buffer[0][i] * buffer[0][i];
   //console.log("processAudio: " + ss.toFixed(7));
-  this.currDrawer.setAudioLevel(ss);
+  // running moving average
+  this.audioLevel = ((AUDIO_LEVEL_HISTORY-1) * this.audioLevel + ss) / AUDIO_LEVEL_HISTORY;
+  this.currDrawer.setAudioLevel(this.audioLevel);
   return buffer;
 }
 
