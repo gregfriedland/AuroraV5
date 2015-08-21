@@ -53,7 +53,7 @@ if (process.argv.length > 2) {
 }
 
 // start the camera used by face detection and the VideoDrawer
-var cam = new camera.Camera(CAM_SIZE);
+var cam = new camera.Camera(CAM_SIZE, FPS);
 cam.start(FPS);
 
 // cv can use a lot of memory unless we garbage collect often

@@ -10,6 +10,7 @@ function VideoDrawer(width, height, numColors, cam) {
 VideoDrawer.prototype.draw = function(leds, palette) {
     var instance = this;
     instance.palette = palette;
+
     if (this.cam.getImage() != null) {
         var img = instance.cam.getImage().clone();
         img.resize(leds.width, leds.height);
@@ -28,7 +29,6 @@ VideoDrawer.prototype.draw = function(leds, palette) {
 
         instance.colorIndex += instance.values.colorSpeed;
     }
-
 }
 
 VideoDrawer.prototype.setAudioLevel = function(level) {

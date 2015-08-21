@@ -9,6 +9,7 @@ FaceDetector.prototype.start = function(fps) {
 	this.intervalId = setInterval(function() {
 	    if (instance.cam.getImage() != null) {
 	    	var img = instance.cam.getImage().clone();
+
 		    img.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', {}, function(err, faces) {
 			    if (err) throw err;
 			    //console.log("  face detection");
