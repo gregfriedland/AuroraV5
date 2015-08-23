@@ -4,7 +4,7 @@ function AlienBlobDrawer(width, height, numColors) {
   this.colorIndex = 0;
   this.values = {speed: 3, colorSpeed: 0, detail: 3, zoom: 70, 
     audioSensitivity: 10, maxAudioShift: 10};
-  this.ranges = {speed: [0,100], colorSpeed: [0,100], detail: [1,4], zoom: [0,100], 
+  this.ranges = {speed: [0,100], colorSpeed: [0,50], detail: [1,4], zoom: [0,100], 
     audioSensitivity: [0,100], maxAudioShift: [0,100]};
   this.decay = 0.5;
   this.speedMultiplier = 0.07;

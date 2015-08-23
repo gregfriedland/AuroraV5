@@ -4,7 +4,7 @@ function VideoDrawer(width, height, numColors, cam) {
     this.cam = cam;
     this.audioLevel = 0;
     this.values = {colorSpeed: 0, audioSensitivity: 10, maxAudioShift: 10};
-    this.ranges = {colorSpeed: [0,100], audioSensitivity: [0,100], maxAudioShift: [0,100]};
+    this.ranges = {colorSpeed: [0,50], audioSensitivity: [0,100], maxAudioShift: [0,100]};
 }
 
 VideoDrawer.prototype.draw = function(leds, palette) {

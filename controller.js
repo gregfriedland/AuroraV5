@@ -1,6 +1,5 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
-var coreAudio = require("node-core-audio");
 
 var FACEDETECTION_FPS = 10
 var FACEDETECTION_HISTORY_SIZE = 3 * FACEDETECTION_FPS;
@@ -11,19 +10,23 @@ function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low) + low);
 }
 
-function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInterval, cam) {
+function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInterval, cam, enableAudio) {
   this.leds = leds;
   this.paletteMgr = paletteMgr;
   this.drawers = drawers;
   this.currDrawer = drawers[startDrawerName];
   this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
   this.cam = cam;
-  audioEngine = coreAudio.createNewAudioEngine();
-  audioEngine.setOptions({sampleRate: 11025, framesPerBuffer: 512, inputChannels: 1, outputChannels: 1})
 
-  var instance = this;
-  audioEngine.addAudioCallback( function(buffer) { return instance.processAudio(buffer); });
-  this.audioLevel = 0;
+  if (enableAudio) {
+    var coreAudio = require("node-core-audio");
+    audioEngine = coreAudio.createNewAudioEngine();
+    audioEngine.setOptions({sampleRate: 11025, framesPerBuffer: 512, inputChannels: 1, outputChannels: 1})
+
+    var instance = this;
+    audioEngine.addAudioCallback( function(buffer) { return instance.processAudio(buffer); });
+    this.audioLevel = 0;
+  }
 
   console.log('starting drawer ' + startDrawerName);
 
@@ -104,7 +107,9 @@ Controller.prototype.foundFaces = function(present) {
 Controller.prototype.changeDrawer = function(drawer) {
   console.log("changing to drawer: " + drawer.name);
   this.currDrawer = drawer;
+  this.randomizeSettings();
   this.currDrawer.reset()
+
   this.drawerChange.lastChange = new Date().getTime();
 }
 
