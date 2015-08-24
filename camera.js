@@ -1,5 +1,6 @@
 var cv = require('opencv');
-//var ReadWriteLock = require('rwlock');
+var ReadWriteLock = require('rwlock');
+
 // Camera class that allows multiple sources to access the last acquired
 // image.
 function Camera(size, fps) {
@@ -7,7 +8,7 @@ function Camera(size, fps) {
 	this.cam.setWidth(size[0]);
 	this.cam.setHeight(size[1]);
 	this.image = null;
-//        this.lock = new ReadWriteLock();
+    this.lock = new ReadWriteLock();
 }
 
 Camera.prototype.start = function(fps) {
@@ -17,24 +18,27 @@ Camera.prototype.start = function(fps) {
 	var instance = this;
 	this.intervalId = setInterval(function() {
         var startTime = new Date().getTime();
-//        instance.lock.writeLock(function (release) {
+        // instance.lock.writeLock(function (release) {
             instance.cam.read(function(err, im, didRead) {
-              //  release();
-                // console.log("elapsed1: " + (new Date().getTime() - startTime));
+                // release();
+                console.log("camera: acquired");
 
-		if (didRead) {
+      	        if (didRead) {
                     instance.image = im.clone();
 
                     // keep track of effective camera fps
                     var currTime = new Date().getTime();
                     if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
-			console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
-			fpsInfo = {count: 0, lastTime: currTime, outputInterval: fpsInfo.outputInterval};
+    		            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
+    		            fpsInfo = {count: 0, lastTime: currTime, outputInterval: fpsInfo.outputInterval};
                     }
                     fpsInfo.count++;
-		}
+    		    } else {
+                    console.log("  same image");
+                }
+
             });
-//        });
+        // });
 	}, 1000 / fps);
 }
 
