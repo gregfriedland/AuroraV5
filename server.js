@@ -34,12 +34,13 @@ var DEPTH = 48; // bit depth: 24 or 48
 // *** End settings match ***
 
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
-var FPS = 25;
+var FPS = 30;
 var START_DRAWER = 'Bzr';
 var DRAWER_CHANGE_INTERVAL = 60000;
 var CAM_SIZE = (1024, 768)
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
+var ENABLE_CAMERA = true;
 
 //// End Server config variables ///
 
@@ -54,11 +55,13 @@ if (process.argv.length > 2) {
 }
 
 // start the camera used by face detection and the VideoDrawer
-var cam = new camera.Camera(CAM_SIZE, FPS);
-cam.start(FPS);
+if (ENABLE_CAMERA) {
+    var cam = new camera.Camera(CAM_SIZE, FPS);
+    cam.start(FPS);
+}
 
 // cv can use a lot of memory unless we garbage collect often
-setInterval(function() { console.log("collecting garbage"); global.gc(); }, 10000);
+//setInterval(function() { console.log("collecting garbage"); global.gc(); }, 10000);
 
 var allDrawers = 
   [new drawers1D.GradientDrawer(), 
