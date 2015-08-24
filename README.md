@@ -27,7 +27,7 @@ Version 5 of the Aurora LED wall project.
   2. `cd AuroraV5`
   3. `npm install`
 
-5. Install Aurora to run automatically when the system boots
+5. Install Aurora to start when the system boots
   * Serial version
     1. `sudo cp AuroraV5/system/aurora-serial-init.d /etc/init.d/aurora-serial`
     2. `sudo chmod 755 /etc/init.d/aurora-serial`
@@ -38,7 +38,11 @@ Version 5 of the Aurora LED wall project.
     3. `cp AuroraV5/system/fcserver-init.d /etc/init.d/fcserver`
     4. `chmod 755 /etc/init.d/fcserver`
 
-6. Optional for Rasperry Pi
+6. Setup Raspberry Pi Camera V4L2 driver (so )
+  1. Follow instructions [here](http://www.linux-projects.org/modules/sections/index.php?op=viewarticle&artid=14)
+  2. Reboot
+
+7. Optional for Rasperry Pi
   1. Comment out this line in node_modules/serialport/serialport.js which is slowing things down: `//debug('Write: '+JSON.stringify(buffer));`
 
 
