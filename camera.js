@@ -19,24 +19,19 @@ Camera.prototype.start = function(fps) {
 	this.intervalId = setInterval(function() {
         var startTime = new Date().getTime();
         // instance.lock.writeLock(function (release) {
-            instance.cam.read(function(err, im, didRead) {
+            instance.cam.read(function(err, im) {
                 // release();
                 console.log("camera: acquired");
 
-      	        if (didRead) {
-                    instance.image = im.clone();
+                instance.image = im.clone();
 
-                    // keep track of effective camera fps
-                    var currTime = new Date().getTime();
-                    if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
-    		            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
-    		            fpsInfo = {count: 0, lastTime: currTime, outputInterval: fpsInfo.outputInterval};
-                    }
-                    fpsInfo.count++;
-    		    } else {
-                    console.log("  same image");
+                // keep track of effective camera fps
+                var currTime = new Date().getTime();
+                if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
+		            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
+		            fpsInfo = {count: 0, lastTime: currTime, outputInterval: fpsInfo.outputInterval};
                 }
-
+                fpsInfo.count++;
             });
         // });
 	}, 1000 / fps);
