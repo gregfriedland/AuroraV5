@@ -12,7 +12,7 @@ VideoDrawer.prototype.draw = function(leds, palette) {
     instance.palette = palette;
 
     if (this.cam.getImage() != null) {
-        console.log("video: resizing image")
+        //console.log("video: resizing image")
         var img = instance.cam.getImage().clone();
         img.resize(leds.width, leds.height);
         img.convertGrayscale();

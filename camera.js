@@ -21,7 +21,7 @@ Camera.prototype.start = function(fps) {
         // instance.lock.writeLock(function (release) {
             instance.cam.read(function(err, im) {
                 // release();
-                console.log("camera: acquired");
+                //console.log("camera: acquired");
 
                 instance.image = im.clone();
 
