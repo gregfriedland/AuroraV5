@@ -35,9 +35,10 @@ var DEPTH = 48; // bit depth: 24 or 48
 
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
 var FPS = 30;
-var START_DRAWER = 'Video';
+var CAMERA_FPS = 15;
+var START_DRAWER = 'Bzr';
 var DRAWER_CHANGE_INTERVAL = 60000;
-var CAM_SIZE = (1024, 768)
+var CAM_SIZE = (640, 480)
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
 var ENABLE_CAMERA = true;
@@ -56,8 +57,8 @@ if (process.argv.length > 2) {
 
 // start the camera used by face detection and the VideoDrawer
 if (ENABLE_CAMERA) {
-    var cam = new camera.Camera(CAM_SIZE, FPS);
-    cam.start(FPS);
+    var cam = new camera.Camera(CAM_SIZE, CAMERA_FPS);
+    cam.start(CAMERA_FPS);
 }
 
 // cv can use a lot of memory unless we garbage collect often

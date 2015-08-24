@@ -1,9 +1,9 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
 
-var FACEDETECTION_FPS = 20
-var FACEDETECTION_HISTORY_SIZE = 3 * FACEDETECTION_FPS;
-var FACEDETECTION_SIGNAL_THRESHOLD = 0.75;
+var FACEDETECTION_FPS = 0.5
+var FACEDETECTION_HISTORY_SIZE = 3;
+var FACEDETECTION_SIGNAL_THRESHOLD = 1;
 var AUDIO_LEVEL_HISTORY = 30;
 
 function randomInt (low, high) {
