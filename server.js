@@ -4,6 +4,9 @@
 // agent.start()
 // require('look').start();
 
+var SegfaultHandler = require('segfault-handler');
+SegfaultHandler.registerHandler();
+
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
@@ -41,7 +44,7 @@ var DRAWER_CHANGE_INTERVAL = 60000;
 var CAM_SIZE = (640, 480)
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
-var ENABLE_CAMERA = true;
+var ENABLE_CAMERA = false;
 
 //// End Server config variables ///
 
@@ -96,6 +99,8 @@ function loop() {
   control.loop();
 }
 loop();
+
+setInterval(function() { console.log('gc'); global.gc(); }, 10000);
 
 //// Start the http server ///
 app.get('/', function(req, res) {

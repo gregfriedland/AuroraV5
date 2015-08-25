@@ -3,7 +3,7 @@ var fs = require('fs');
 var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
-var updateImageInterval = 3;
+var updateImageInterval = 0;
 var fpsOutputMillis = 5000;
 var GAMMA = 4;
 
@@ -50,6 +50,8 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
       console.log('Connected to fcserver');
       leds.connected = true;
     });
+
+    this.packet = new Buffer(new Uint8ClampedArray(4 + this.width * this.height * 3));
   } else if (device.indexOf("/dev/tty") > -1) {
     // ... or connect over a serial port ...
     leds.serial = new SerialPort(device, {baudrate: 115200});
@@ -64,9 +66,13 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     leds.serial.on('error', function(e) {
       console.error('Serial port error: ' + e);
     });
+
+    this.packet = new Buffer(new Uint8ClampedArray(this.width * this.height * depth / 8));
   } else {
     // ... or don't connect to anything
   }
+
+  this.png = new PNG({width: width, height: height});
 }
 
 LEDs.prototype.setAllRgb48 = function(rgb48) {
@@ -94,24 +100,23 @@ LEDs.prototype.clear = function() {
 }
 
 LEDs.prototype.packData = function() {
-  var packet;
+    var dest;
   if (this.socket != null) {
     // Fadecandy
-    packet = new Uint8ClampedArray(4 + this.width * this.height * 3);
-    var dest = 4; // Dest position in our packet. Start right after the header.
+    dest = 4; // Dest position in our packet. Start right after the header.
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
         var rgb = gammaRgb48(this.gammaTable, this.depth, this.rgbs48[x][y]);
-        packet[dest++] = rgb[0];
-        packet[dest++] = rgb[1];
-        packet[dest++] = rgb[2];
+        this.packet[dest++] = rgb[0];
+        this.packet[dest++] = rgb[1];
+        this.packet[dest++] = rgb[2];
       }
     }
 
-    return packet.buffer;
+    return this.packet.buffer;
   } else {
     // Serial
-    packet = [];
+    dest = 0;
     if (this.depth == 48) {
       //console.log(this.rgbs48[0][0]);
       for (var y=0; y<this.height; y++) {
@@ -119,12 +124,12 @@ LEDs.prototype.packData = function() {
 	  var r = this.gammaTable[this.rgbs48[x][y][0]]; 
 	  var g = this.gammaTable[this.rgbs48[x][y][1]]; 
 	  var b = this.gammaTable[this.rgbs48[x][y][2]]; 
-	  packet.push(Math.min(254, r & 0xFF));
-	  packet.push(Math.min(254, r >> 8));
-	  packet.push(Math.min(254, g & 0xFF));
-	  packet.push(Math.min(254, g >> 8));
-	  packet.push(Math.min(254, b & 0xFF));
-	  packet.push(Math.min(254, b >> 8));
+	  this.packet[dest++] = Math.min(254, r & 0xFF);
+	  this.packet[dest++] = Math.min(254, r >> 8);
+	  this.packet[dest++] = Math.min(254, g & 0xFF);
+	  this.packet[dest++] = Math.min(254, g >> 8);
+	  this.packet[dest++] = Math.min(254, b & 0xFF);
+	  this.packet[dest++] = Math.min(254, b >> 8);
 	}
       }
     } else if (this.depth == 24) {
@@ -133,42 +138,40 @@ LEDs.prototype.packData = function() {
 	  var r = this.gammaTable[this.rgbs48[x][y][0] >> 8]; 
 	  var g = this.gammaTable[this.rgbs48[x][y][1] >> 8]; 
 	  var b = this.gammaTable[this.rgbs48[x][y][2] >> 8]; 
-	  packet.push(Math.min(254, r));
-          packet.push(Math.min(254, g));
-          packet.push(Math.min(254, b));
+	  this.packet[dest++] = Math.min(254, r);
+          this.packet[dest++] = Math.min(254, g);
+          this.packet[dest++] = Math.min(254, b);
 	}
       }
     }
     
-    packet.push(255); // add the termination
+    this.packet[dest++]; // add the termination
   }
   
-  return new Buffer(packet);
+  return this.packet;
 }
 
 // update the internal png
 LEDs.prototype.updateImage = function() {
-  var png = new PNG({width: this.width, height: this.height});
-
   var dest = 0;
   for (var y=0; y<this.height; y++) {
     for (var x=0; x<this.width; x++) {
       for (var c=0; c<3; c++) {
-        png.data[dest++] = this.rgbs48[x][y][c] >> 8;
+        this.png.data[dest++] = this.rgbs48[x][y][c] >> 8;
       }
-      png.data[dest++] = 255; // alpha
+      this.png.data[dest++] = 255; // alpha
     }
   }
   
   var leds = this;
   var chunks = [];
-  png.on('data', function(chunk) {
+  this.png.on('data', function(chunk) {
     chunks.push(chunk);
   });
-  png.on('end', function() {
+  this.png.on('end', function() {
      leds.pngData = Buffer.concat(chunks);
   });
-  png.pack();
+  this.png.pack();
 }
 
 LEDs.prototype.sendData = function(packet) {

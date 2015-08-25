@@ -1,7 +1,7 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
 
-var FACEDETECTION_FPS = 0.5
+var FACEDETECTION_FPS = 10
 var FACEDETECTION_HISTORY_SIZE = 3;
 var FACEDETECTION_SIGNAL_THRESHOLD = 1;
 var AUDIO_LEVEL_HISTORY = 30;
@@ -30,8 +30,10 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
 
   console.log('starting drawer ' + startDrawerName);
 
-  this.facedetector = new facedetector.FaceDetector(cam, FACEDETECTION_HISTORY_SIZE);
-  this.facedetector.start(FACEDETECTION_FPS);
+  if (cam) {
+    this.facedetector = new facedetector.FaceDetector(cam, FACEDETECTION_HISTORY_SIZE);
+    this.facedetector.start(FACEDETECTION_FPS);
+  }
 }
 
 Controller.prototype.processAudio = function(buffer) {
@@ -100,7 +102,10 @@ Controller.prototype.randomizeSettings = function() {
 }
 
 Controller.prototype.foundFaces = function(present) {
-  return this.facedetector.foundFaces(present, FACEDETECTION_SIGNAL_THRESHOLD);
+  if (this.facedetector)
+    return this.facedetector.foundFaces(present, FACEDETECTION_SIGNAL_THRESHOLD);
+  else
+    return false;
 }
 
 Controller.prototype.changeDrawer = function(drawer) {
