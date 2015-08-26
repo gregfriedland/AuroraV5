@@ -1,7 +1,7 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
 
-var FACEDETECTION_FPS = 10
+var FACEDETECTION_FPS = 0
 var FACEDETECTION_HISTORY_SIZE = 3;
 var FACEDETECTION_SIGNAL_THRESHOLD = 1;
 var AUDIO_LEVEL_HISTORY = 30;
@@ -30,7 +30,7 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
 
   console.log('starting drawer ' + startDrawerName);
 
-  if (cam) {
+  if (cam && FACEDETECTION_FPS > 0) {
     this.facedetector = new facedetector.FaceDetector(cam, FACEDETECTION_HISTORY_SIZE);
     this.facedetector.start(FACEDETECTION_FPS);
   }
