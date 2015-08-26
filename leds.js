@@ -25,13 +25,15 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     this.depth = depth;
     this.lastUpdateMillis = Date.now();
     this.rgbs48 = [];
+    for (var x=0; x<this.width; x++) 
+        this.rgbs48[x] = [];
+
     if (GAMMA > 1)
         this.gammaTable = createGammaTable(GAMMA, 1<<(depth/3), 1<<(depth/3));
     else
         this.gammaTable = null;
 
     this.clear();
-    this.pngData = "";
     this.count = 0;
     this.socket = null;
     this.serial = null;
@@ -72,6 +74,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
         // ... or don't connect to anything
     }
 
+    this.pngData = "";
     this.png = new PNG({width: width, height: height});
     this.chunks = [];
     var instance = this;
@@ -85,9 +88,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
 }
 
 LEDs.prototype.setAllRgb48 = function(rgb48) {
-    this.rgbs48 = [];
     for (var x=0; x<this.width; x++) {
-        this.rgbs48[x] = [];
         for (var y=0; y<this.height; y++) {
             this.rgbs48[x][y] = rgb48;
         }
@@ -109,16 +110,18 @@ LEDs.prototype.clear = function() {
 }
 
 LEDs.prototype.packData = function() {
-        var dest;
+    var dest;
     if (this.socket != null) {
         // Fadecandy
         dest = 4; // Dest position in our packet. Start right after the header.
         for (var y = 0; y < this.height; y++) {
             for (var x = 0; x < this.width; x++) {
-                var rgb = gammaRgb48(this.gammaTable, this.depth, this.rgbs48[x][y]);
-                this.packet[dest++] = rgb[0];
-                this.packet[dest++] = rgb[1];
-                this.packet[dest++] = rgb[2];
+                var r = this.gammaTable[this.rgbs48[x][y][0]]; 
+                var g = this.gammaTable[this.rgbs48[x][y][1]]; 
+                var b = this.gammaTable[this.rgbs48[x][y][2]]; 
+                this.packet[dest++] = r;
+                this.packet[dest++] = g;
+                this.packet[dest++] = b;
             }
         }
 

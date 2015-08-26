@@ -6,7 +6,7 @@ function FaceDetector(cam, historySize) {
 FaceDetector.prototype.start = function(fps) {
 	// run opencv and store the faces in this.faces
 	var instance = this;
-	this.intervalId = setInterval(function() {
+	var func = function() {
 	    if (instance.cam.getImage() != null) {
 	    	var img = instance.cam.getImage().clone();
 
@@ -20,7 +20,8 @@ FaceDetector.prototype.start = function(fps) {
 		        // 	  console.log("    detected " + faces.length + " faces");
 		    });
 		}
-	}, 1000 / fps);
+	};
+	this.intervalId = setInterval(func, 1000 / fps);
 
 	console.log("starting face detection");
 }

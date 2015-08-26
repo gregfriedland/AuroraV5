@@ -87,11 +87,8 @@ var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
   START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 
-function loop() {  
-  setTimeout(function() { loop(); }, 1000 / FPS);
-  control.loop();
-}
-loop();
+var func = function() { control.loop() };
+setInterval(func, 1000 / FPS);
 
 // setInterval(function() { console.log('gc'); global.gc(); }, 10000);
 

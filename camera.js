@@ -16,7 +16,7 @@ Camera.prototype.start = function(fps) {
     fpsInfo = {count: 0, lastTime: Date.now(), outputInterval: 5000};
 
 	var instance = this;
-	this.intervalId = setInterval(function() {
+    var func = function() {
         var startTime = Date.now();
         // instance.lock.writeLock(function (release) {
             instance.cam.read(function(err, im) {
@@ -28,14 +28,14 @@ Camera.prototype.start = function(fps) {
                 // keep track of effective camera fps
                 var currTime = Date.now();
                 if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
-		            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
-		            fpsInfo.count = 0;
+                    console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
+                    fpsInfo.count = 0;
                     fpsInfo.lastTime = currTime;
                 }
                 fpsInfo.count++;
             });
-        // });
-	}, 1000 / fps);
+        };
+	this.intervalId = setInterval(func, 1000 / fps);
 }
 
 Camera.prototype.stop = function(fps) {
