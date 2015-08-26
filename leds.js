@@ -3,7 +3,7 @@ var fs = require('fs');
 var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
-var updateImageInterval = 5;
+var updateImageInterval = 0;
 var fpsOutputMillis = 5000;
 var GAMMA = 4;
 
@@ -51,7 +51,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
             leds.connected = true;
         });
 
-        this.packet = new Buffer(new Uint8ClampedArray(4 + this.width * this.height * 3));
+        this.packet = new Buffer(new Uint8ClampedArray(4 + this.width * this.height * 3 + 1));
     } else if (device.indexOf("/dev/tty") > -1) {
         // ... or connect over a serial port ...
         leds.serial = new SerialPort(device, {baudrate: 115200});
@@ -67,7 +67,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
             console.error('Serial port error: ' + e);
         });
 
-        this.packet = new Buffer(this.width * this.height * depth / 8);
+        this.packet = new Buffer(this.width * this.height * depth / 8 + 1);
     } else {
         // ... or don't connect to anything
     }

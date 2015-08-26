@@ -61,9 +61,6 @@ if (ENABLE_CAMERA) {
     cam.start(CAMERA_FPS);
 }
 
-// cv can use a lot of memory unless we garbage collect often
-//setInterval(function() { console.log("collecting garbage"); global.gc(); }, 10000);
-
 var allDrawers = 
   [new drawers1D.GradientDrawer(), 
    new drawers1D.WipeDrawer(),
@@ -97,7 +94,7 @@ function loop() {
 }
 loop();
 
-setInterval(function() { console.log('gc'); global.gc(); }, 10000);
+// setInterval(function() { console.log('gc'); global.gc(); }, 10000);
 
 //// Start the http server ///
 app.get('/', function(req, res) {
