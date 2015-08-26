@@ -1,9 +1,11 @@
 var cv = require('opencv');
-var ReadWriteLock = require('rwlock');
+//var ReadWriteLock = require('rwlock');
 
 // Camera class that allows multiple sources to access the last acquired
 // image.
 function Camera(size, fps) {
+    this.height = size[1];
+    this.width = size[0];
 	this.cam = new cv.VideoCapture(0);
 	this.cam.setWidth(size[0]);
 	this.cam.setHeight(size[1]);
@@ -23,7 +25,7 @@ Camera.prototype.start = function(fps) {
                 // release();
                 //console.log("camera: acquired");
 
-                instance.image = im.clone();
+                instance.image = im;
 
                 // keep track of effective camera fps
                 var currTime = Date.now();
@@ -47,8 +49,5 @@ Camera.prototype.getImage = function() {
 	return this.image;
 }
 
-Camera.prototype.getLock = function() {
-	return this.lock;
-}
 
 module.exports.Camera = Camera;

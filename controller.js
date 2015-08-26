@@ -32,7 +32,7 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
 
   if (cam) {
     this.facedetector = new facedetector.FaceDetector(cam, FACEDETECTION_HISTORY_SIZE);
-    this.facedetector.start(FACEDETECTION_FPS);
+    //this.facedetector.start(FACEDETECTION_FPS);
   }
 }
 
