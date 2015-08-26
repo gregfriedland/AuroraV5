@@ -1,9 +1,5 @@
 //// Node.js server ////
 
-// var agent = require('webkit-devtools-agent');
-// agent.start()
-// require('look').start();
-
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
@@ -89,8 +85,6 @@ var control = new controller.Controller(leds, paletteMgr, availableDrawers,
 
 var func = function() { control.loop() };
 setInterval(func, 1000 / FPS);
-
-// setInterval(function() { console.log('gc'); global.gc(); }, 10000);
 
 //// Start the http server ///
 app.get('/', function(req, res) {
