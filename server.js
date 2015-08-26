@@ -4,9 +4,6 @@
 // agent.start()
 // require('look').start();
 
-var SegfaultHandler = require('segfault-handler');
-SegfaultHandler.registerHandler();
-
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
