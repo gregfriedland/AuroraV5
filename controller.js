@@ -56,10 +56,11 @@ Controller.prototype.loop = function() {
       var drawerNames = Object.keys(this.drawers).filter(
         function(name) { return name != "Off" && name != "Video"; });
       var randDrawerName = drawerNames[randomInt(0, drawerNames.length)];
-      this.currDrawer = this.drawers[randDrawerName];
-      console.log('changing drawer randomly to ' + this.currDrawer.name);
-    } else
+      this.changeDrawer(this.drawers[randDrawerName]);
+    } else {
       console.log('randomizing drawer settings');
+      //global.gc();
+    }
 
     this.randomizeSettings();
     this.drawerChange.lastChange = Date.now();
@@ -109,6 +110,7 @@ Controller.prototype.foundFaces = function(present) {
 }
 
 Controller.prototype.changeDrawer = function(drawer) {
+  //global.gc();
   console.log("changing to drawer: " + drawer.name);
   this.currDrawer = drawer;
   this.randomizeSettings();
