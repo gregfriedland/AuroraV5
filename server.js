@@ -24,7 +24,6 @@ var socketIO = require('socket.io');
 var io = socketIO(http);
 var path = require('path');
 
-
 //// Server config variables ////
 
 // *** These must match settings on the Teensy ***

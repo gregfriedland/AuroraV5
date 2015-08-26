@@ -23,7 +23,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     this.width = width;
     this.height = height;
     this.depth = depth;
-    this.lastUpdateMillis = new Date().getTime();
+    this.lastUpdateMillis = Date.now();
     this.rgbs48 = [];
     if (GAMMA > 1)
         this.gammaTable = createGammaTable(GAMMA, 1<<(depth/3), 1<<(depth/3));
@@ -36,7 +36,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     this.socket = null;
     this.serial = null;
     this.connected = false;
-    this.frameTimer = { count: 0, lastUpdate: new Date().getTime() }
+    this.frameTimer = { count: 0, lastUpdate: Date.now() }
     var leds = this; // for closures
     
     if (device.indexOf("ws:") > -1) {
@@ -73,6 +73,15 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     }
 
     this.png = new PNG({width: width, height: height});
+    this.chunks = [];
+    var instance = this;
+    this.png.on('data', function(chunk) {
+        instance.chunks.push(chunk);
+    });
+    this.png.on('end', function() {
+         leds.pngData = Buffer.concat(instance.chunks);
+         instance.chunks = [];
+    });
 }
 
 LEDs.prototype.setAllRgb48 = function(rgb48) {
@@ -163,14 +172,6 @@ LEDs.prototype.updateImage = function() {
         }
     }
     
-    var leds = this;
-    var chunks = [];
-    this.png.on('data', function(chunk) {
-        chunks.push(chunk);
-    });
-    this.png.on('end', function() {
-         leds.pngData = Buffer.concat(chunks);
-    });
     this.png.pack();
 }
 
@@ -210,10 +211,11 @@ LEDs.prototype.update = function() {
         this.sendData(packet);
 
         this.frameTimer.count++;
-        var timeDiff = new Date().getTime() - this.frameTimer.lastUpdate;
+        var timeDiff = Date.now() - this.frameTimer.lastUpdate;
         if (timeDiff > fpsOutputMillis) {
             console.log((this.frameTimer.count / timeDiff * 1000).toFixed(1) + " fps");
-            this.frameTimer = { count: 0, lastUpdate: new Date().getTime() }
+            this.frameTimer.count = 0;
+            this.frameTimer.lastUpdate = Date.now();
         }
     }
 }

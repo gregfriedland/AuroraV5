@@ -143,7 +143,7 @@ var fails = 0;
 function updateImage() {
   $.ajax({
     type: "GET",
-    url:'/image?random='+new Date().getTime(),
+    url:'/image?random='+Date.now(),
     contentType: "image/png",
     timeout: 100,
     success: function(data) {
@@ -166,10 +166,10 @@ updateImage();
 
 
 /*
-var lastLeapUpdate = new Date().getTime();
+var lastLeapUpdate = Date.now();
 Leap.loop(function(frame) {
 //Leap.loop({}, function(frame) {
-  var currTime = new Date().getTime();
+  var currTime = Date.now();
   if (currTime - lastLeapUpdate < leapUpdateInterval) {
     return;
   }

@@ -15,7 +15,7 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
   this.paletteMgr = paletteMgr;
   this.drawers = drawers;
   this.currDrawer = drawers[startDrawerName];
-  this.drawerChange = {interval: drawerChangeInterval, lastChange: new Date().getTime()};
+  this.drawerChange = {interval: drawerChangeInterval, lastChange: Date.now()};
   this.cam = cam;
 
   if (enableAudio) {
@@ -48,7 +48,7 @@ Controller.prototype.processAudio = function(buffer) {
 }
 
 Controller.prototype.loop = function() {
-  if (new Date().getTime() - this.drawerChange.lastChange > this.drawerChange.interval &&
+  if (Date.now() - this.drawerChange.lastChange > this.drawerChange.interval &&
     this.currDrawer.name != "Off") {
     // change the drawer every so often to keep things interesting except if we're on
     // the 'video' drawer in which case only change the settings
@@ -62,7 +62,7 @@ Controller.prototype.loop = function() {
       console.log('randomizing drawer settings');
 
     this.randomizeSettings();
-    this.drawerChange.lastChange = new Date().getTime();
+    this.drawerChange.lastChange = Date.now();
   } else if (this.currDrawer.name != "Video" && this.foundFaces(true)) {
     console.log('found some faces nearby');
     this.changeDrawer(this.drawers["Video"]);
@@ -114,7 +114,7 @@ Controller.prototype.changeDrawer = function(drawer) {
   this.randomizeSettings();
   this.currDrawer.reset()
 
-  this.drawerChange.lastChange = new Date().getTime();
+  this.drawerChange.lastChange = Date.now();
 }
 
 module.exports.Controller = Controller;
