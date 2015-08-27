@@ -6,15 +6,18 @@ var cv = require('opencv');
 function Camera(size, fps) {
     this.height = size[1];
     this.width = size[0];
+    console.log("camera: creating");
 	this.cam = new cv.VideoCapture(0);
+    console.log("camera: setting width");
 	this.cam.setWidth(size[0]);
+    console.log("camera: setting height");
 	this.cam.setHeight(size[1]);
 	this.image = null;
     // this.lock = new ReadWriteLock();
 }
 
 Camera.prototype.start = function(fps) {
-	console.log("starting camera");
+	console.log("camera: starting");
     fpsInfo = {count: 0, lastTime: Date.now(), outputInterval: 5000};
 
 	var instance = this;

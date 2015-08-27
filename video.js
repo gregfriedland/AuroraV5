@@ -12,8 +12,8 @@ VideoDrawer.prototype.draw = function(leds, palette) {
     instance.palette = palette;
 
     if (this.cam.getImage() != null) {
-        //console.log("video: resizing image")
         var img = instance.cam.getImage();
+        //console.log("video: resizing image from " + img.width() + " x " + img.height());
 
         var audioIndex = instance.audioLevel * palette.numColors * instance.values.audioSensitivity / 100;
         audioIndex = Math.min(audioIndex, instance.values.maxAudioShift * palette.numColors / 100);
@@ -29,7 +29,6 @@ VideoDrawer.prototype.draw = function(leds, palette) {
             }
         }
 
-	//img.release();
         instance.colorIndex += instance.values.colorSpeed;
     }
 }
