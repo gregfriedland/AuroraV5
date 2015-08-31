@@ -1,5 +1,7 @@
 //// Node.js server ////
 
+//require('look').start();
+
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
 var alienblob = require('./alienblob.js');
@@ -31,9 +33,9 @@ var DEPTH = 48; // bit depth: 24 or 48
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
 var FPS = 30;
 var CAMERA_FPS = 10;
-var START_DRAWER = 'Video';
+var START_DRAWER = 'Bzr';
 var DRAWER_CHANGE_INTERVAL = 60000;
-var CAM_SIZE = [640, 480];
+var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
 var ENABLE_CAMERA = true;
@@ -139,5 +141,10 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-
-
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    if (ENABLE_CAMERA)
+	cam.stop();
+    leds.stop();
+    process.exit();
+});

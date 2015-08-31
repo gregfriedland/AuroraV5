@@ -87,6 +87,13 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
     });
 }
 
+LEDs.prototype.stop = function() {
+    if (this.serial) {
+	console.log("Closing serial connection");
+	this.serial.close();
+    }	
+}
+
 LEDs.prototype.setAllRgb48 = function(rgb48) {
     for (var x=0; x<this.width; x++) {
         for (var y=0; y<this.height; y++) {

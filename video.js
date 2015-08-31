@@ -22,9 +22,9 @@ VideoDrawer.prototype.draw = function(leds, palette) {
 	    var xx = Math.floor(x * this.cam.width / leds.width);
             for (var y=0; y<leds.height; y++) {
 		var yy = Math.floor(y * this.cam.height / leds.height);
-                var rgb = img.pixel(yy, xx);
-				    
-                var index = Math.floor(rgb[0] / 256 * instance.palette.numColors + audioIndex + instance.colorIndex);
+                var red = img[(xx + yy * this.cam.width) * 3];
+		//console.log(red);
+                var index = Math.floor(red / 256 * instance.palette.numColors + audioIndex + instance.colorIndex);
                 leds.rgbs48[x][y] = instance.palette.rgbs48[index % instance.palette.numColors];
             }
         }
