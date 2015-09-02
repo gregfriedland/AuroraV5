@@ -9,7 +9,7 @@ FaceDetector.prototype.start = function(fps) {
     var func = function() {
 	instance.cam.getCvImage().detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', 
 					       {}, function(err, faces) {
-	    console.log("  face detection running");
+	    //console.log("  face detection running");
 	    if (err) throw err;
 	    instance.history.data[instance.history.index] = faces.length > 0;
 	    instance.history.index = (instance.history.index+1) % instance.history.data.length;
