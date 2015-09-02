@@ -33,12 +33,13 @@ var DEPTH = 48; // bit depth: 24 or 48
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
 var FPS = 30;
 var CAMERA_FPS = 10;
-var START_DRAWER = 'Bzr';
+var START_DRAWER = 'Video';
 var DRAWER_CHANGE_INTERVAL = 60000;
 var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
 var ENABLE_CAMERA = true;
+var UPDATE_IMAGE_INTERVAL = 0;
 
 //// End Server config variables ///
 
@@ -55,7 +56,6 @@ if (process.argv.length > 2) {
 // start the camera used by face detection and the VideoDrawer
 if (ENABLE_CAMERA) {
     var cam = new camera.Camera(CAM_SIZE, CAMERA_FPS);
-    cam.start(CAMERA_FPS);
 }
 
 var allDrawers = 
@@ -81,7 +81,7 @@ for (var i = 0; i < allDrawers.length; i++) {
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
-var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight);
+var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight, UPDATE_IMAGE_INTERVAL);
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
   START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 

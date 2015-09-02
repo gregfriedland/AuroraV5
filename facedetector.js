@@ -4,26 +4,23 @@ function FaceDetector(cam, historySize) {
 }
 
 FaceDetector.prototype.start = function(fps) {
-	// run opencv and store the faces in this.faces
-	var instance = this;
-	var func = function() {
-	    if (instance.cam.getImage() != null) {
-	    	var img = instance.cam.getImage().clone();
+    // run opencv face detection and store the faces in this.faces
+    var instance = this;
+    var func = function() {
+	instance.cam.getCvImage().detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', 
+					       {}, function(err, faces) {
+	    console.log("  face detection running");
+	    if (err) throw err;
+	    instance.history.data[instance.history.index] = faces.length > 0;
+	    instance.history.index = (instance.history.index+1) % instance.history.data.length;
+	    instance.lastFaces = faces;
+	    // if (faces.length > 0)
+	    // 	  console.log("    detected " + faces.length + " faces");
+	});
+    };
+    this.intervalId = setInterval(func, 1000 / fps);
 
-		    img.detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', {}, function(err, faces) {
-			    console.log("  face detection");
-			    if (err) throw err;
-		      	instance.history.data[instance.history.index] = faces.length > 0;
-		    	instance.history.index = (instance.history.index+1) % instance.history.data.length;
-		        instance.lastFaces = faces;
-		        // if (faces.length > 0)
-		        // 	  console.log("    detected " + faces.length + " faces");
-		    });
-		}
-	};
-	this.intervalId = setInterval(func, 1000 / fps);
-
-	console.log("starting face detection");
+    console.log("starting face detection");
 }
 
 FaceDetector.prototype.stop = function() {

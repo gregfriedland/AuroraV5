@@ -3,7 +3,6 @@ var fs = require('fs');
 var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
-var updateImageInterval = 0;
 var fpsOutputMillis = 5000;
 var GAMMA = 4;
 
@@ -18,7 +17,8 @@ function createGammaTable(gamma, numvals, maxval) {
     return table;
 }
 
-function LEDs(width, height, depth, device, layoutLeftToRight) {
+function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterval) {
+    this.updateImageInterval = updateImageInterval;
     this.layoutLeftToRight = layoutLeftToRight;
     this.width = width;
     this.height = height;
@@ -72,6 +72,8 @@ function LEDs(width, height, depth, device, layoutLeftToRight) {
         this.packet = new Buffer(this.width * this.height * depth / 8 + 1);
     } else {
         // ... or don't connect to anything
+	if (this.updateImageInterval == 0)
+	    this.updateImageInterval = 5;
     }
 
     this.pngData = "";
@@ -212,7 +214,7 @@ LEDs.prototype.sendData = function(packet) {
 
 LEDs.prototype.update = function() {
     this.count++;
-    if (updateImageInterval != 0 && this.count % updateImageInterval == 0) {
+    if (this.updateImageInterval != 0 && this.count % this.updateImageInterval == 0) {
         this.updateImage();
     }
 

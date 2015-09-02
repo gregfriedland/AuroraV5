@@ -1,58 +1,69 @@
 var cv = require('opencv');
 var raspicam2 = require('raspicam2').raspicam2;
+var sys = require('sys')
+var exec = require('child_process').exec;
+var FpsCounter = require('./fpscounter.js').FpsCounter;
 
 // Camera class that allows multiple sources to access the last acquired
 // image.
 function Camera(size, fps) {
-    this.height = size[1];
     this.width = size[0];
-    // console.log("camera: creating");
-    // 	this.cam = new cv.VideoCapture(0);
-    // console.log("camera: setting width");
-    // 	this.cam.setWidth(size[0]);
-    // console.log("camera: setting height");
-    // 	this.cam.setHeight(size[1]);
+    this.height = size[1];
+    this.fpsCounter = FpsCounter("camera");
+    this.cvImage = null;
 
-    raspicam2.open();
-    //raspicam2.setSize(this.width, this.height);
-    this.image = new Buffer(this.height * this.width * 3);
+    var instance = this;
+    var child = exec("uname -m", function (error, stdout, stderr) {
+	if (error !== null)
+	    console.log('exec error: ' + error);
+	instance.isRaspi = stdout.trim() == "armv7l";
+	
+	if (instance.isRaspi) {
+	    console.log("camera: creating RaspiCam");
+	    raspicam2.open();
+	    raspicam2.setSize(instance.width, instance.height);
+
+	    cv.readImage("dummy.png", function(err, cvImg) {
+		instance.cvImage = cvImg;
+		instance.data = new Buffer(this.width * this.height * 3);
+	    });
+	} else {
+	    console.log("camera: creating OpenCV cam");
+	    instance.cvcam = new cv.VideoCapture(0);
+	    instance.cvcam.setWidth(size[0]);
+	    instance.cvcam.setHeight(size[1]);
+	    instance.cvImage = cv.ReadSync();
+	}
+	startCam(fps);
+    });
 }
 
-Camera.prototype.start = function(fps) {
+function startCam(instance, fps) {
     console.log("starting camera");
-    var fpsInfo = {count: 0, lastTime: Date.now(), outputInterval: 5000};
-    var instance = this;
 
-    var funcInner = function(im) {
-        //instance.image = im;
-
-        // keep track of effective camera fps
-        var currTime = Date.now();
-        if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
-            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
-            fpsInfo.count = 0;
-            fpsInfo.lastTime = currTime;
-        }
-        fpsInfo.count++;
-    };
-
-    var funcAsync = function() { raspicam2.readAsync(instance.image, funcInner); }
-
-    var funcSync = function() {
-	raspicam2.read(instance.image);
-
-        // keep track of effective camera fps
-        var currTime = Date.now();
-        if (currTime - fpsInfo.lastTime > fpsInfo.outputInterval) {
-            console.log("camera: " + (1000 * fpsInfo.count/(currTime - fpsInfo.lastTime)).toFixed(1));
-            fpsInfo.count = 0;
-            fpsInfo.lastTime = currTime;
-        }
-        fpsInfo.count++;
-    };
-
-    this.intervalId = setInterval(funcAsync, 1000 / fps);
-    //this.intervalId = setInterval(funcSync, 1000 / fps);
+    var funcOuter;
+    if (instance.isRaspi) {
+	var funcInner = function() {
+	    instance.cvImage.put(instance.data);
+	    sys.exit();
+	    instance.fpsCounter.tick(5000);
+	};
+	funcOuter = function() { 
+	    if (!instance.inited) return;
+	    raspicam2.readAsync(instance.data, funcInner); 
+	}
+    } else {
+	var funcInner = function(err, im) {
+	    if (err) throw err;
+	    instance.cvImage = im;
+	    instance.fpsCounter.tick(5000);
+	};
+	funcOuter = function() {
+	    if (!instance.inited) return;
+	    instance.cvcam.read(funcInner); 
+	}
+    }
+    this.intervalId = setInterval(funcOuter, 1000 / fps);
 }
 
 Camera.prototype.stop = function(fps) {
@@ -61,8 +72,8 @@ Camera.prototype.stop = function(fps) {
     console.log("stopping camera");
 }
 
-Camera.prototype.getImage = function() {
-    return this.image;
+Camera.prototype.getCvImage = function() {
+    return this.cvImage;
 }
 
 
