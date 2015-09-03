@@ -3,6 +3,7 @@ var raspicam2 = require('raspicam2').raspicam2;
 var sys = require('sys')
 var exec = require('child_process').exec;
 var FpsCounter = require('./fpscounter.js').FpsCounter;
+var path = require('path');
 
 // Camera class that allows multiple sources to access the last acquired
 // image.
@@ -23,7 +24,8 @@ function Camera(size, fps) {
 	    raspicam2.open();
 	    raspicam2.setSize(instance.width, instance.height);
 
-	    cv.readImage("dummy.png", function(err, cvImg) {
+	    var dummyImageFn = path.resolve(__dirname, 'dummy.png');
+	    cv.readImage(dummyImageFn, function(err, cvImg) {
 		instance.cvImage = cvImg;
 		instance.data = new Buffer(this.width * this.height * 3);
 	    });

@@ -1,14 +1,17 @@
+var path = require('path');
+
 function FaceDetector(cam, historySize) {
-	this.cam = cam;
-	this.history = {data: new Array(historySize), index: 0};
+    this.cam = cam;
+    this.history = {data: new Array(historySize), index: 0};
 }
 
 FaceDetector.prototype.start = function(fps) {
     // run opencv face detection and store the faces in this.faces
+    var cascadeFn = path.resolve(__dirname, 'node_modules/opencv/data/haarcascade_frontalface_alt.xml');
     var instance = this;
     var func = function() {
-	instance.cam.getCvImage().detectObject('./node_modules/opencv/data/haarcascade_frontalface_alt.xml', 
-					       {}, function(err, faces) {
+	if (instance.cam.getCvImage() == null) return;
+	instance.cam.getCvImage().detectObject(cascadeFn, {}, function(err, faces) {
 	    //console.log("  face detection running");
 	    if (err) throw err;
 	    instance.history.data[instance.history.index] = faces.length > 0;
