@@ -144,8 +144,10 @@ io.sockets.on('connection', function (socket) {
 function cleanup() {
     if (ENABLE_CAMERA)
 	cam.stop();
-    leds.stop();
-    process.exit();
+    leds.stop(function(err) { 
+	if (err) console.log("Error when stopping leds: " + err);
+	process.exit();
+    });
 }
 
 process.on('SIGINT', function() {

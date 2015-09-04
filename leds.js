@@ -89,13 +89,15 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
     });
 }
 
-LEDs.prototype.stop = function() {
+LEDs.prototype.stop = function(callback) {
     this.clear();
     this.update();
     
     if (this.serial) {
     	console.log("Closing serial connection");
-    	this.serial.close();
+    	this.serial.close(callback);
+    } else {
+	callback();
     }
 }
 
