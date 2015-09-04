@@ -72,8 +72,9 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
         this.packet = new Buffer(this.width * this.height * depth / 8 + 1);
     } else {
         // ... or don't connect to anything
-	if (this.updateImageInterval == 0)
-	    this.updateImageInterval = 5;
+        console.log("No serial device found so activating image update");
+    	if (this.updateImageInterval == 0)
+    	    this.updateImageInterval = 5;
     }
 
     this.pngData = "";

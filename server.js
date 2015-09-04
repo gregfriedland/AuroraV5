@@ -38,7 +38,7 @@ var DRAWER_CHANGE_INTERVAL = 60000;
 var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
-var ENABLE_CAMERA = true;
+var ENABLE_CAMERA = false;
 var UPDATE_IMAGE_INTERVAL = 0;
 
 //// End Server config variables ///

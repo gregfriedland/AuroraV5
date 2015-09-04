@@ -2,6 +2,7 @@
 #include <v8.h>
 #include <nan.h>
 
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,34 +32,43 @@ static void alienblob(int width, int height, int numColors, float zoff, int perl
 class AlienBlob : public Nan::ObjectWrap {
  public:
     static void Init(v8::Local<v8::Object> exports) {
+        std::cout << "AlienBlob::Init()\n";
         Nan::HandleScope scope;
 
         // Prepare constructor template
         v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
         tpl->SetClassName(Nan::New("AlienBlob").ToLocalChecked());
-        tpl->InstanceTemplate()->SetInternalFieldCount(0);
+        tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
         // Prototype
         Nan::SetPrototypeMethod(tpl, "run", Run);
+        Nan::SetPrototypeMethod(tpl, "getIndex", GetIndex);
 
         constructor.Reset(tpl->GetFunction());
         exports->Set(Nan::New("AlienBlob").ToLocalChecked(), tpl->GetFunction());
     }
 
  private:
-    explicit AlienBlob() {}
-    ~AlienBlob() {}
+    explicit AlienBlob(int _width, int _height, int _numColors)
+    : width(_width), height(_height), numColors(_numColors) 
+    {
+        indices = new int[width*height];
+    }
+    ~AlienBlob() 
+    {
+        delete indices;
+    }
 
     static void New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         if (info.IsConstructCall()) {
             // Invoked as constructor: `new AlienBlob(...)`
-            AlienBlob* obj = new AlienBlob();
+            AlienBlob* obj = new AlienBlob(info[0]->NumberValue(), info[1]->NumberValue(), info[2]->NumberValue());
             obj->Wrap(info.This());
             info.GetReturnValue().Set(info.This());
         } else {
             // Invoked as plain function `AlienBlob(...)`, turn into construct call.
-            const int argc = 0;
-            v8::Local<v8::Value> argv[argc] = { };
+            const int argc = 2;
+            v8::Local<v8::Value> argv[argc] = { info[0], info[1]};
             v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
             info.GetReturnValue().Set(cons->NewInstance(argc, argv));
         }
@@ -67,27 +77,31 @@ class AlienBlob : public Nan::ObjectWrap {
         for (int i = 0; i < 360; i ++) sineTable[i] = sin(i * PI / 180);
     }
 
+    static void GetIndex(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+        AlienBlob* obj = ObjectWrap::Unwrap<AlienBlob>(info.Holder());
+        int x = info[0]->NumberValue();
+        int y = info[1]->NumberValue();
+        int i = x + y * obj->width;
+        assert(i >= 0 && i < obj->width * obj->height);
+        info.GetReturnValue().Set(Nan::New(obj->indices[i]));
+    }
+
     static void Run(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-        int width = info[0]->NumberValue();
-        int height = info[1]->NumberValue();
-        int numColors = info[2]->NumberValue();
-        float zoff = info[3]->NumberValue();
-        int perlinOctaves = info[4]->NumberValue();
-        float perlinDecay = info[5]->NumberValue();
-        float zoom = info[6]->NumberValue();
+        AlienBlob* obj = ObjectWrap::Unwrap<AlienBlob>(info.Holder());
+        float zoff = info[0]->NumberValue();
+        int perlinOctaves = info[1]->NumberValue();
+        float perlinDecay = info[2]->NumberValue();
+        float zoom = info[3]->NumberValue();
 
-        v8::Local<v8::Object> array = info[7]->ToObject();
-        v8::Handle<v8::Object> buffer = array->Get(v8::String::New("buffer"))->ToObject();
-        unsigned int offset = array->Get(v8::String::New("byteOffset"))->Uint32Value();
-        // int length = array->Get(v8::String::New("byteLength"))->Uint32Value();
-        int* indices = (int*) &((char*) buffer->GetIndexedPropertiesExternalArrayData())[offset];
-
-        alienblob(width, height, numColors, zoff, perlinOctaves, perlinDecay, zoom, indices);
+        alienblob(obj->width, obj->height, obj->numColors, zoff, perlinOctaves, 
+            perlinDecay, zoom, obj->indices);
 
         info.GetReturnValue().Set(Nan::Undefined());
     }
 
     static Nan::Persistent<v8::Function> constructor;
+    int width, height, numColors;
+    int *indices;
 };
 
 Nan::Persistent<v8::Function> AlienBlob::constructor;
@@ -123,7 +137,7 @@ static void alienblob(int width, int height, int numColors, float zoff, int perl
             float h = (sineTable[deg % 360] + 1) / 2;
             
             // determine pixel color
-            indices[x*height + y] = (int) (h * numColors);
+            indices[x + y * width] = (int) (h * numColors);
             
             xx += incr;
         }

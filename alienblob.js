@@ -21,14 +21,14 @@ AlienBlobDrawer.prototype.reset = function() {
 }
 
 AlienBlobDrawer.prototype.draw = function(leds, palette) {
-  var indices = this.alienblob.run(this.pos, this.values["zoom"]/100.0, this.values["detail"], this.decay);
-  
+  this.alienblob.run(this.pos, this.values["detail"], this.decay, this.values["zoom"]/100.0);
+    
   var audioIndex = this.audioLevel * palette.numColors * this.values.audioSensitivity / 100;
   audioIndex = Math.min(audioIndex, this.values.maxAudioShift * palette.numColors / 100);
 
   for (var x=0; x<leds.width; x++) {
     for (var y=0; y<leds.height; y++) {
-      index = Math.floor(indices[x*leds.height + y] + this.colorIndex + audioIndex);
+      index = Math.floor(this.alienblob.getIndex(x,y) + this.colorIndex + audioIndex);
         
       leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
     }
