@@ -1,5 +1,6 @@
 var cv = require('opencv');
-var raspicam2 = require('raspicam2').raspicam2;
+var raspicam2;
+try { raspicam2 = require('raspicam2').raspicam2; } catch (e) {}
 var sys = require('sys')
 var exec = require('child_process').exec;
 var FpsCounter = require('./fpscounter.js').FpsCounter;
