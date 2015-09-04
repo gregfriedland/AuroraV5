@@ -1,6 +1,6 @@
 //// Node.js server ////
 
-//require('look').start();
+require('look').start();
 
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
@@ -31,10 +31,10 @@ var DEPTH = 48; // bit depth: 24 or 48
 // *** End settings match ***
 
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
-var FPS = 30;
+var FPS = 60;
 var CAMERA_FPS = 10;
 var START_DRAWER = 'Bzr';
-var DRAWER_CHANGE_INTERVAL = 60000;
+var DRAWER_CHANGE_INTERVAL = 10000;
 var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
@@ -141,10 +141,18 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-process.on('SIGINT', function() {
-    console.log("Caught interrupt signal");
+function cleanup() {
     if (ENABLE_CAMERA)
 	cam.stop();
     leds.stop();
     process.exit();
+}
+
+process.on('SIGINT', function() {
+    console.log("Caught sigint");
+    cleanup();
+});
+process.on('SIGTERM', function() {
+    console.log("Caught sigterm");
+    cleanup();
 });

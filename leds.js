@@ -90,10 +90,13 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
 }
 
 LEDs.prototype.stop = function() {
+    this.clear();
+    this.update();
+    
     if (this.serial) {
-	console.log("Closing serial connection");
-	this.serial.close();
-    }	
+    	console.log("Closing serial connection");
+    	this.serial.close();
+    }
 }
 
 LEDs.prototype.setAllRgb48 = function(rgb48) {
