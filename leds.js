@@ -229,8 +229,8 @@ LEDs.prototype.update = function() {
     if (this.connected) {
         var packet = this.packData();
         this.sendData(packet);
-        this.fpsCounter.tick(5000);
     }
+    this.fpsCounter.tick(5000);
 }
 
 

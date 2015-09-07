@@ -31,9 +31,9 @@ var DEPTH = 24; // bit depth: 24 or 48
 // *** End settings match ***
 
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
-var FPS = 80;
+var FPS = 45;
 var CAMERA_FPS = 10;
-var START_DRAWER = 'Bzr';
+var START_DRAWER = 'AlienBlob';
 var DRAWER_CHANGE_INTERVAL = 60000;
 var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections

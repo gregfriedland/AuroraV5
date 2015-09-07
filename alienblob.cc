@@ -42,6 +42,7 @@ class AlienBlob : public Nan::ObjectWrap {
         // Prototype
         Nan::SetPrototypeMethod(tpl, "run", Run);
         Nan::SetPrototypeMethod(tpl, "getIndex", GetIndex);
+        Nan::SetPrototypeMethod(tpl, "getData", GetData);
 
         constructor.Reset(tpl->GetFunction());
         exports->Set(Nan::New("AlienBlob").ToLocalChecked(), tpl->GetFunction());
@@ -74,6 +75,17 @@ class AlienBlob : public Nan::ObjectWrap {
 
         init_noise();
         for (int i = 0; i < 360; i ++) sineTable[i] = sin(i * PI / 180);
+    }
+
+    static void GetData(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+      AlienBlob* obj = ObjectWrap::Unwrap<AlienBlob>(info.Holder());
+
+      v8::Local<v8::Object> arr = info[0]->ToObject();
+      if (arr->GetIndexedPropertiesExternalArrayDataType() != v8::kExternalIntArray) return;
+      int n = arr->GetIndexedPropertiesExternalArrayDataLength();
+      int* data = static_cast<int*>(arr->GetIndexedPropertiesExternalArrayData());
+
+      memcpy(data, obj->indices, n * sizeof(int));
     }
 
     static void GetIndex(const Nan::FunctionCallbackInfo<v8::Value>& info) {
