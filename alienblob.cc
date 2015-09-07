@@ -3,6 +3,7 @@
 #include <nan.h>
 
 #include <iostream>
+#include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -99,7 +100,7 @@ class AlienBlob : public Nan::ObjectWrap {
 
     static void Run(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         AlienBlob* obj = ObjectWrap::Unwrap<AlienBlob>(info.Holder());
-        float zoff = info[0]->NumberValue();
+        double zoff = info[0]->NumberValue();
         int perlinOctaves = info[1]->NumberValue();
         float perlinDecay = info[2]->NumberValue();
         float zoom = info[3]->NumberValue();

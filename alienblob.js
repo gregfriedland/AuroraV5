@@ -2,7 +2,7 @@ var AlienBlobC = require("./build/Release/alienblob.node").AlienBlob;
 
 function AlienBlobDrawer(width, height, numColors) {
     this.name = "AlienBlob";
-    this.pos = Math.floor(Math.random() * 1e6);
+    this.pos = Math.random() * 1e6;
     this.colorIndex = 0;
     this.values = {speed: 3, colorSpeed: 0, detail: 3, zoom: 70, 
 		   audioSensitivity: 10, maxAudioShift: 10};
@@ -17,7 +17,7 @@ function AlienBlobDrawer(width, height, numColors) {
 }
 
 AlienBlobDrawer.prototype.reset = function() {
-    this.pos = Math.floor(Math.random() * 1e6);
+    this.pos = Math.random() * 1e6;
     this.colorIndex = 0;
 }
 
