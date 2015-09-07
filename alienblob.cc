@@ -101,6 +101,7 @@ class AlienBlob : public Nan::ObjectWrap {
     static void Run(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         AlienBlob* obj = ObjectWrap::Unwrap<AlienBlob>(info.Holder());
         double zoff = info[0]->NumberValue();
+	//std::cout << std::setprecision(10) << zoff << std::endl;
         int perlinOctaves = info[1]->NumberValue();
         float perlinDecay = info[2]->NumberValue();
         float zoom = info[3]->NumberValue();
