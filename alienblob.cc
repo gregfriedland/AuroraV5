@@ -32,7 +32,6 @@ static void alienblob(int width, int height, int numColors, float zoff, int perl
 class AlienBlob : public Nan::ObjectWrap {
  public:
     static void Init(v8::Local<v8::Object> exports) {
-        std::cout << "AlienBlob::Init()\n";
         Nan::HandleScope scope;
 
         // Prepare constructor template

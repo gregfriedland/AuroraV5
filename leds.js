@@ -4,7 +4,7 @@ var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
 
 var fpsOutputMillis = 5000;
-var GAMMA = 4;
+var GAMMA = 1;
 
 
 function createGammaTable(gamma, numvals, maxval) {
@@ -28,10 +28,7 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
     for (var x=0; x<this.width; x++) 
         this.rgbs48[x] = [];
 
-    if (GAMMA > 1)
-        this.gammaTable = createGammaTable(GAMMA, 1<<(depth/3), 1<<(depth/3));
-    else
-        this.gammaTable = null;
+    this.gammaTable = createGammaTable(GAMMA, 1<<(depth/3), 1<<(depth/3));
 
     this.clear();
     this.count = 0;
@@ -98,7 +95,7 @@ LEDs.prototype.stop = function(callback) {
     	console.log("Closing serial connection");
     	this.serial.close(callback);
     } else {
-	callback();
+	   callback();
     }
 }
 
