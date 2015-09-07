@@ -2,6 +2,7 @@ var PNG = require('pngjs').PNG;
 var fs = require('fs');
 var WebSocket = require('ws');
 var SerialPort = require("serialport").SerialPort;
+var FpsCounter = require('./fpscounter.js').FpsCounter;
 
 var fpsOutputMillis = 5000;
 var GAMMA = 1;
@@ -35,7 +36,8 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
     this.socket = null;
     this.serial = null;
     this.connected = false;
-    this.frameTimer = { count: 0, lastUpdate: Date.now() }
+    this.fpsCounter = new FpsCounter("leds");
+
     var leds = this; // for closures
     
     if (device.indexOf("ws:") > -1) {
@@ -63,7 +65,8 @@ function LEDs(width, height, depth, device, layoutLeftToRight, updateImageInterv
             console.log("Serial data: " + data);
         });
         leds.serial.on('error', function(e) {
-            console.error('Serial port error: ' + e);
+            if (leds.serial != null)
+                console.error('Serial port error: ' + e);
         });
 
         this.packet = new Buffer(this.width * this.height * depth / 8 + 1);
@@ -94,6 +97,7 @@ LEDs.prototype.stop = function(callback) {
     if (this.serial) {
     	console.log("Closing serial connection");
     	this.serial.close(callback);
+        this.serial = null;
     } else {
 	   callback();
     }
@@ -211,7 +215,8 @@ LEDs.prototype.sendData = function(packet) {
         this.socket.send(packet);
     } else {
         // Serial
-        this.serial.write(packet);
+        if (this.serial != null)
+            this.serial.write(packet);
     }
 }
 
@@ -224,14 +229,7 @@ LEDs.prototype.update = function() {
     if (this.connected) {
         var packet = this.packData();
         this.sendData(packet);
-
-        this.frameTimer.count++;
-        var timeDiff = Date.now() - this.frameTimer.lastUpdate;
-        if (timeDiff > fpsOutputMillis) {
-            console.log((this.frameTimer.count / timeDiff * 1000).toFixed(1) + " fps");
-            this.frameTimer.count = 0;
-            this.frameTimer.lastUpdate = Date.now();
-        }
+        this.fpsCounter.tick(5000);
     }
 }
 

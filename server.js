@@ -1,6 +1,6 @@
 //// Node.js server ////
 
-require('look').start();
+//require('look').start();
 
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
@@ -85,8 +85,17 @@ var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight, UPDATE
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
   START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 
-var func = function() { control.loop() };
-setInterval(func, 1000 / FPS);
+var lastTime = Date.now();
+var loopFunc = function() { 
+  // console.log("startLoop: " + (Date.now() - lastTime));
+  lastTime = Date.now();
+  control.loop();
+  // console.log("  midLoop: " + (Date.now() - lastTime));
+  var timeout = Math.floor(lastTime + 1000 / FPS - Date.now());
+  // console.log("    timeout: " + (1000 / FPS) + " " + timeout);
+  setTimeout(loopFunc, Math.max(0, timeout));
+}
+loopFunc();
 
 //// Start the http server ///
 app.get('/', function(req, res) {

@@ -8,7 +8,7 @@ function FpsCounter(name) {
 FpsCounter.prototype.tick = function(outputInterval) {
     var currTime = Date.now();
     if (currTime - this.lastTime > outputInterval) {
-        console.log(name + ": " + (1000 * this.count/(currTime - this.lastTime)).toFixed(1));
+        console.log(this.name + ": " + (1000 * this.count/(currTime - this.lastTime)).toFixed(1) + "fps");
         this.count = 0;
         this.lastTime = currTime;
     }
