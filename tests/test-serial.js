@@ -1,7 +1,8 @@
-var SIZE = 64 * 32 * 6;
+var SIZE = 64 * 32 * 3;
 
 var device = process.argv[2];
 var COUNTS = parseInt(process.argv[3]);
+var WARMUP_COUNTS = 10;
 var SerialPort = require("serialport").SerialPort;
 var serial = new SerialPort(device, {baudrate: 115200});
 
@@ -12,7 +13,7 @@ for (var i = 0; i < SIZE; i++)
 	packet[i] = 0;
 packet[SIZE] = 255;
 function writeData() {
-	if (counter == COUNTS - 20)
+	if (counter == COUNTS - WARMUP_COUNTS)
 		startTime = Date.now();
 
 	serial.write(packet);
@@ -26,7 +27,7 @@ serial.on("data", function(data) {
 	if (counter > 0)
 		writeData();
 	else {
-		console.log("Done: " + COUNTS * 1000 / (Date.now() - startTime));
+		console.log("Done: " + (COUNTS - WARMUP_COUNTS) * 1000 / (Date.now() - startTime));
 		process.exit();//serial.close();
 	}
 });
