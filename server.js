@@ -27,11 +27,11 @@ var path = require('path');
 // *** These must match settings on the Teensy ***
 var WIDTH = 64;
 var HEIGHT = 32;
-var DEPTH = 24; // bit depth: 24 or 48
 // *** End settings match ***
 
+var DEPTH = 24; // bit depth: 24 or 48
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
-var FPS = 45;
+var FPS = 80;
 var CAMERA_FPS = 10;
 var START_DRAWER = 'AlienBlob';
 var DRAWER_CHANGE_INTERVAL = 60000;

@@ -5,7 +5,7 @@
 #define LED_TYPE ADAFRUIT_MATRIX // 2801 | 2811 | ADAFRUIT_MATRIX
 #define WIDTH 64
 #define HEIGHT 32
-#define DEPTH 48 // 24 or 48bit
+#define COLOR_DEPTH 48 // internal color depth to use in SmartMatrix: 24 or 48bit
 #define BLINK_PIN 13
 #define OUTPUT_FPS_INTERVAL 5000
 #define USE_GAMMA_CONVERSION
@@ -27,7 +27,6 @@
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
   #include <SmartMatrix3.h>
 
-  #define COLOR_DEPTH 24                  // known working: 24, 48 - If the sketch uses type `rgb24` directly, COLOR_DEPTH must be 24
   const uint8_t kMatrixWidth = 64;        // known working: 32, 64, 96, 128
   const uint8_t kMatrixHeight = 32;       // known working: 16, 32, 48, 64
   const uint8_t kRefreshDepth = 36;       // known working: 24, 36, 48
@@ -35,13 +34,9 @@
   const uint8_t kPanelType = SMARTMATRIX_HUB75_32ROW_MOD16SCAN;   // use SMARTMATRIX_HUB75_16ROW_MOD8SCAN for common 16x32 panels
   const uint8_t kMatrixOptions = (SMARTMATRIX_OPTIONS_NONE);      // see http://docs.pixelmatix.com/SmartMatrix for options
   const uint8_t kBackgroundLayerOptions = (SM_BACKGROUND_OPTIONS_NONE);
-  const uint8_t kScrollingLayerOptions = (SM_SCROLLING_OPTIONS_NONE);
-  const uint8_t kIndexedLayerOptions = (SM_INDEXED_OPTIONS_NONE);
 
   SMARTMATRIX_ALLOCATE_BUFFERS(matrix, kMatrixWidth, kMatrixHeight, kRefreshDepth, kDmaBufferRows, kPanelType, kMatrixOptions);
   SMARTMATRIX_ALLOCATE_BACKGROUND_LAYER(backgroundLayer, kMatrixWidth, kMatrixHeight, COLOR_DEPTH, kBackgroundLayerOptions);
-  SMARTMATRIX_ALLOCATE_SCROLLING_LAYER(scrollingLayer, kMatrixWidth, kMatrixHeight, COLOR_DEPTH, kScrollingLayerOptions);
-  SMARTMATRIX_ALLOCATE_INDEXED_LAYER(indexedLayer, kMatrixWidth, kMatrixHeight, COLOR_DEPTH, kIndexedLayerOptions);
 #endif
 
 #define BUFFER_SIZE 2500
@@ -136,19 +131,19 @@ void loop() {
     } else {
 #if (LED_TYPE==2811)
 #elif (LED_TYPE==2801)
-    #if DEPTH == 24
+    #if COLOR_DEPTH == 24
       leds[pix/3] += (c) << (8*(pix%3));
     #else // 48 bit
       leds[pix/6] += (c) << (8*(pix%6));
     #endif
 #elif (LED_TYPE==ADAFRUIT_MATRIX)
-    #if DEPTH == 24
+    #if COLOR_DEPTH == 24
       // the order expected is:
       // 24bit:
       // RGBRGB
       // 111222    <- pixel#
       int pos = pix / 3;
-      RGB_TYPE(DEPTH)& col = matrix.backBuffer()[pos];
+      RGB_TYPE(COLOR_DEPTH)& col = backgroundLayer.backBuffer()[pos];
       switch (pix % 3) {
         case 0:
           col.red = c;
@@ -160,13 +155,13 @@ void loop() {
           col.blue = c;
           break;
       }
-    #elif DEPTH == 48 && defined(USE_GAMMA_CONVERSION)
+    #elif COLOR_DEPTH == 48 && defined(USE_GAMMA_CONVERSION)
       // the order expected is:
       // 24bit:
       // RGBRGB
       // 111222    <- pixel#
       int pos = pix / 3;
-      RGB_TYPE(DEPTH)& col = matrix.backBuffer()[pos];
+      RGB_TYPE(COLOR_DEPTH)& col = backgroundLayer.backBuffer()[pos];
       switch (pix % 3) {
         case 0:
           col.red = gammaTable[c];
@@ -184,7 +179,7 @@ void loop() {
       // RRGGBBRRGGBB
       // 1 1 1 2 2 2    <- pixel#
       int pos = pix / 6;
-      RGB_TYPE(DEPTH)& col = matrix.backBuffer()[pos];
+      RGB_TYPE(COLOR_DEPTH)& col = backgroundLayer.backBuffer()[pos];
       switch (pix % 6) {
         case 0:
           col.red = (col.red & 0xFF00) + c;
