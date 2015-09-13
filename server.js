@@ -1,6 +1,7 @@
 //// Node.js server ////
 
 //require('look').start();
+var memwatch = require('memwatch');
 
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
@@ -80,12 +81,20 @@ for (var i = 0; i < allDrawers.length; i++) {
 }
 
 //// Start the patterns ////
+console.log('start');
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
 var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight, UPDATE_IMAGE_INTERVAL);
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
 					START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 
-function func() { control.loop(); };
+console.log("diff: ");
+var hd = new memwatch.HeapDiff();
+console.log(hd.end());
+function func() { 
+    control.loop(); 
+    console.log("diff: " + hd.end());
+    hd = new memwatch.HeapDiff();
+};
 setInterval(func, 1000 / FPS);
 
 //// Start the http server ///
