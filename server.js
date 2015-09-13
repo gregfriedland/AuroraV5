@@ -1,7 +1,9 @@
 //// Node.js server ////
 
 //require('look').start();
-var memwatch = require('memwatch');
+// var memwatch = require('memwatch');
+// var agent = require('webkit-devtools-agent');
+// agent.start()
 
 var controller = require('./controller.js');
 var drawers1D = require('./drawers1D.js');
@@ -87,13 +89,8 @@ var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight, UPDATE
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
 					START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 
-console.log("diff: ");
-var hd = new memwatch.HeapDiff();
-console.log(hd.end());
 function func() { 
     control.loop(); 
-    console.log("diff: " + hd.end());
-    hd = new memwatch.HeapDiff();
 };
 setInterval(func, 1000 / FPS);
 

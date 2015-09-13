@@ -11,18 +11,18 @@ FaceDetector.prototype.start = function(fps) {
     var instance = this;
 
     var innerFunc = function(err, faces) {
-	//console.log("  face detection running");
-	if (err) throw err;
-	instance.history.data[instance.history.index] = faces.length > 0;
-	instance.history.index = (instance.history.index+1) % instance.history.data.length;
-	instance.lastFaces = faces;
-	// if (faces.length > 0)
-	// 	  console.log("    detected " + faces.length + " faces");
+        //console.log("  face detection running");
+        if (err) throw err;
+        instance.history.data[instance.history.index] = faces.length > 0;
+        instance.history.index = (instance.history.index+1) % instance.history.data.length;
+        instance.lastFaces = faces;
+        // if (faces.length > 0)
+        //    console.log("    detected " + faces.length + " faces");
     };
 
     var outerFunc = function() {
-	if (instance.cam.getCvImage() == null) return;
-	instance.cam.getCvImage().detectObject(cascadeFn, {}, innerFunc);
+        if (instance.cam.getCvImage() == null) return;
+        instance.cam.getCvImage().detectObject(cascadeFn, {}, innerFunc);
     };
     this.intervalId = setInterval(func, 1000 / fps);
 
@@ -39,7 +39,8 @@ FaceDetector.prototype.stop = function() {
 FaceDetector.prototype.foundFaces = function(present, signalThreshold) {
     var foundCount = 0;
     for (var i = 0; i < this.history.data.length; i++) {
-	foundCount += ((b == true && present) || (b == false && !present));
+        var b = this.history.data[i];
+        foundCount += ((b == true && present) || (b == false && !present));
     }
     // console.log(present + " " + foundCount);
     return (foundCount / this.history.data.length >= signalThreshold);

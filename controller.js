@@ -57,14 +57,14 @@ Controller.prototype.loop = function() {
         // change the drawer every so often (but not to off or video) to keep things interesting 
         // except if we're on the 'video' drawer in which case only change the settings
         if (this.currDrawer.name != "Video") {
-    var drawerNames = [];
-    for (var name in this.drawers) {
-            if (name != "Off" && name != "Video")
-        drawerNames.push(name);
-    }
+            var drawerNames = [];
+            for (var name in this.drawers) {
+                if (name != "Off" && name != "Video")
+                    drawerNames.push(name);
+            }
 
-                var randDrawerName = drawerNames[randomInt(0, drawerNames.length)];
-    this.changeDrawer(this.drawers[randDrawerName]);
+            var randDrawerName = drawerNames[randomInt(0, drawerNames.length)];
+            this.changeDrawer(this.drawers[randDrawerName]);
         } else {
             console.log('randomizing drawer settings');
         }
