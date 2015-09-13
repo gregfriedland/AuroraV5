@@ -75,8 +75,8 @@ var allDrawers =
 var availableDrawers = {};  // drawers that can be selected from the UI
 for (var i = 0; i < allDrawers.length; i++) {
     if ((HEIGHT == 1 && allDrawers[i].type().indexOf("1D") > -1) ||
-	(HEIGHT > 1 && allDrawers[i].type().indexOf("2D") > -1)) {
-	availableDrawers[allDrawers[i].name] = allDrawers[i];
+	      (HEIGHT > 1 && allDrawers[i].type().indexOf("2D") > -1)) {
+	       availableDrawers[allDrawers[i].name] = allDrawers[i];
     }
 }
 
@@ -120,42 +120,42 @@ http.listen(8080, function(){
 io.sockets.on('connection', function (socket) {
     // get the allowed programs
     socket.on('get drawers', function (data, fn) {
-	console.log('get drawers: ' + JSON.stringify(data));
-	var settings = control.getSettings();
-	fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
-            allNames: Object.keys(availableDrawers)});
+      	console.log('get drawers: ' + JSON.stringify(data));
+      	var settings = control.getSettings();
+      	fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
+                  allNames: Object.keys(availableDrawers)});
     });
     
     // set the running program, return it's settings
     // plus the palette
     socket.on('set drawer', function (drawerName, fn) {
-	console.log('set drawer: ' + drawerName);
-	control.changeDrawer(availableDrawers[drawerName]);
-	var settings = control.getSettings();
-	fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
+      	console.log('set drawer: ' + drawerName);
+      	control.changeDrawer(availableDrawers[drawerName]);
+      	var settings = control.getSettings();
+      	fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
     });
     
     // update the settings on the server
     socket.on('set settings', function (settingVals, fn) {
-	console.log('set settings: ' + JSON.stringify(settingVals));
-	control.setSettings(settingVals);
-	//fn();
+      	console.log('set settings: ' + JSON.stringify(settingVals));
+      	control.setSettings(settingVals);
+      	//fn();
     });
     
     // randomize the settings on the server
     socket.on('randomize settings', function (data, fn) {
-	console.log('randomize settings: ' + data);
-	control.randomizeSettings();
-	fn(control.getSettings().values);
+      	console.log('randomize settings: ' + data);
+      	control.randomizeSettings();
+      	fn(control.getSettings().values);
     });
 });
 
 function cleanup() {
     if (ENABLE_CAMERA)
-	cam.stop();
+      	cam.stop();
     leds.stop(function(err) { 
-	if (err) console.log("Error when stopping leds: " + err);
-	process.exit();
+	     if (err) console.log("Error when stopping leds: " + err);
+	         process.exit();
     });
 }
 

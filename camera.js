@@ -16,28 +16,28 @@ function Camera(size, fps) {
 
     var instance = this;
     var child = exec("uname -m", function (error, stdout, stderr) {
-	if (error !== null)
-	    console.log('exec error: ' + error);
-	instance.isRaspi = stdout.trim() == "armv7l";
-	
-	if (instance.isRaspi) {
-	    console.log("camera: creating RaspiCam");
-	    raspicam2.open();
-	    raspicam2.setSize(instance.width, instance.height);
+        if (error !== null)
+            console.log('exec error: ' + error);
+        instance.isRaspi = stdout.trim() == "armv7l";
+        
+        if (instance.isRaspi) {
+            console.log("camera: creating RaspiCam");
+            raspicam2.open();
+            raspicam2.setSize(instance.width, instance.height);
 
-	    var dummyImageFn = path.resolve(__dirname, 'dummy.png');
-	    cv.readImage(dummyImageFn, function(err, cvImg) {
-		instance.cvImage = cvImg;
-		instance.data = new Buffer(this.width * this.height * 3);
-	    });
-	} else {
-	    console.log("camera: creating OpenCV cam");
-	    instance.cvcam = new cv.VideoCapture(0);
-	    instance.cvcam.setWidth(size[0]);
-	    instance.cvcam.setHeight(size[1]);
-	    instance.cvImage = cv.ReadSync();
-	}
-	startCam(fps);
+            var dummyImageFn = path.resolve(__dirname, 'dummy.png');
+            cv.readImage(dummyImageFn, function(err, cvImg) {
+                instance.cvImage = cvImg;
+                instance.data = new Buffer(this.width * this.height * 3);
+            });
+        } else {
+            console.log("camera: creating OpenCV cam");
+            instance.cvcam = new cv.VideoCapture(0);
+            instance.cvcam.setWidth(size[0]);
+            instance.cvcam.setHeight(size[1]);
+            instance.cvImage = cv.ReadSync();
+        }
+        startCam(fps);
     });
 }
 
@@ -46,25 +46,25 @@ function startCam(instance, fps) {
 
     var funcOuter;
     if (instance.isRaspi) {
-	var funcInner = function() {
-	    instance.cvImage.put(instance.data);
-	    sys.exit();
-	    instance.fpsCounter.tick(5000);
-	};
-	funcOuter = function() { 
-	    if (!instance.inited) return;
-	    raspicam2.readAsync(instance.data, funcInner); 
-	}
+        var funcInner = function() {
+            instance.cvImage.put(instance.data);
+            sys.exit();
+            instance.fpsCounter.tick(5000);
+        };
+        funcOuter = function() { 
+            if (!instance.inited) return;
+            raspicam2.readAsync(instance.data, funcInner); 
+        }
     } else {
-	var funcInner = function(err, im) {
-	    if (err) throw err;
-	    instance.cvImage = im;
-	    instance.fpsCounter.tick(5000);
-	};
-	funcOuter = function() {
-	    if (!instance.inited) return;
-	    instance.cvcam.read(funcInner); 
-	}
+        var funcInner = function(err, im) {
+            if (err) throw err;
+            instance.cvImage = im;
+            instance.fpsCounter.tick(5000);
+        };
+        funcOuter = function() {
+            if (!instance.inited) return;
+            instance.cvcam.read(funcInner); 
+        }
     }
     this.intervalId = setInterval(funcOuter, 1000 / fps);
 }

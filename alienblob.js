@@ -30,13 +30,13 @@ AlienBlobDrawer.prototype.draw = function(leds, palette) {
     
     this.alienblob.getData(this.indices);
     for (var x=0; x<leds.width; x++) {
-	for (var y=0; y<leds.height; y++) {
-	    //index = Math.floor(this.alienblob.getIndex(x,y) + this.colorIndex + audioIndex);
-	    //index = Math.floor(this.alienblob.indices[x+y*leds.width] + this.colorIndex + audioIndex);
-	    index = Math.floor(this.indices[x+y*leds.width] + this.colorIndex + audioIndex);
-            
-	    leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
-	}
+      	for (var y=0; y<leds.height; y++) {
+      	    //index = Math.floor(this.alienblob.getIndex(x,y) + this.colorIndex + audioIndex);
+      	    //index = Math.floor(this.alienblob.indices[x+y*leds.width] + this.colorIndex + audioIndex);
+      	    index = Math.floor(this.indices[x+y*leds.width] + this.colorIndex + audioIndex);
+                  
+      	    leds.rgbs48[x][y] = palette.rgbs48[index % palette.numColors];
+      	}
     }
     
     this.pos += this.speedMultiplier * this.values.speed / 100.0;
@@ -54,45 +54,45 @@ AlienBlobDrawer.prototype.type = function() {
 
 
 function AlienBlob(width, height, numColors) {
-  this.width = width;
-  this.height = height;
-  this.numColors = numColors;
-   
-  // create precalculated sine table
-  this.sineTable = [];
-  for (i = 0; i < 360; i++)
-    this.sineTable[i] = Math.sin(i * Math.PI / 180);
-  
-  this.indices = [];
-  
-  this.perlin = new PerlinNoise();
+    this.width = width;
+    this.height = height;
+    this.numColors = numColors;
+       
+    // create precalculated sine table
+    this.sineTable = [];
+    for (i = 0; i < 360; i++)
+        this.sineTable[i] = Math.sin(i * Math.PI / 180);
+      
+    this.indices = [];
+      
+    this.perlin = new PerlinNoise();
 }
 
 AlienBlob.prototype.run = function(zoff, zoom, detail, decay) {
-  var incr = 0.3125;
-  var noiseMult = 7;
-  var multiplier = (1-zoom) + 0.02;
+    var incr = 0.3125;
+    var noiseMult = 7;
+    var multiplier = (1-zoom) + 0.02;
 
-  var y, x;
-  var yy = 0;
-  for (var y = 0; y < this.height; y++) {
-    var xx = 0;
-    for (var x = 0; x < this.width; x++) {
-      var n = this.perlin.noise(xx*multiplier, yy*multiplier, zoff, detail, decay);
-      // use pre-calculated sine results
-      var deg = Math.floor((n * noiseMult + 4 * Math.PI) * 180 / Math.PI);
-      var h = (this.sineTable[deg % 360] + 1) / 2;
-      
-      // determine pixel color
-      this.indices[x*this.height + y] = Math.floor(h * this.numColors);
-      
-      xx += incr;
+    var y, x;
+    var yy = 0;
+    for (var y = 0; y < this.height; y++) {
+        var xx = 0;
+        for (var x = 0; x < this.width; x++) {
+            var n = this.perlin.noise(xx*multiplier, yy*multiplier, zoff, detail, decay);
+            // use pre-calculated sine results
+            var deg = Math.floor((n * noiseMult + 4 * Math.PI) * 180 / Math.PI);
+            var h = (this.sineTable[deg % 360] + 1) / 2;
+            
+            // determine pixel color
+            this.indices[x*this.height + y] = Math.floor(h * this.numColors);
+            
+            xx += incr;
+          }
+        
+        yy += incr;
     }
     
-    yy += incr;
-  }
-  
-  return this.indices;
+    return this.indices;
 }
 
 
