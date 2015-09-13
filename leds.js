@@ -175,8 +175,6 @@ LEDs.prototype.packData = function() {
         
         this.packet[dest++] = 255; // add the termination
     }
-    
-    return this.packet;
 }
 
 // update the internal png
@@ -227,8 +225,8 @@ LEDs.prototype.update = function() {
     }
 
     if (this.connected) {
-        var packet = this.packData();
-        this.sendData(packet);
+        this.packData();
+        this.sendData(this.packet);
     }
     this.fpsCounter.tick(5000);
 }

@@ -31,10 +31,10 @@ var HEIGHT = 32;
 
 var DEPTH = 24; // bit depth: 24 or 48
 var NUM_COLORS = 1<<12; // colors in the gradient of each palette
-var FPS = 80;
+var FPS = 60;
 var CAMERA_FPS = 10;
-var START_DRAWER = 'AlienBlob';
-var DRAWER_CHANGE_INTERVAL = 60000;
+var START_DRAWER = 'Bzr';
+var DRAWER_CHANGE_INTERVAL = 10000;
 var CAM_SIZE = [1280, 960];//[640, 480];
 var layoutLeftToRight = false; // only used for serial port connections
 var ENABLE_AUDIO = false;
@@ -47,10 +47,10 @@ var UPDATE_IMAGE_INTERVAL = 0;
 //// Global variables ////
 var device;
 if (process.argv.length > 2) {
-  device = process.argv[2];
+    device = process.argv[2];
 } else {
-  device = "/dev/ttyACM0"; // for direct serial access to Teensy
-  // device = "ws://localhost:7890"; // for fadecandy
+    device = "/dev/ttyACM0"; // for direct serial access to Teensy
+    // device = "ws://localhost:7890"; // for fadecandy
 }
 
 // start the camera used by face detection and the VideoDrawer
@@ -59,86 +59,86 @@ if (ENABLE_CAMERA) {
 }
 
 var allDrawers = 
-  [new drawers1D.GradientDrawer(), 
-   new drawers1D.WipeDrawer(),
-   new drawers1D.WaveDrawer(),
-   new drawers1D.SparkleDrawer(),
-   new drawers1D.PulseDrawer(),
-   new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
-   new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
-   new video.VideoDrawer(WIDTH, HEIGHT, NUM_COLORS, cam),
-   // new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
-   new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)
-  ];
+    [new drawers1D.GradientDrawer(), 
+     new drawers1D.WipeDrawer(),
+     new drawers1D.WaveDrawer(),
+     new drawers1D.SparkleDrawer(),
+     new drawers1D.PulseDrawer(),
+     new alienblob.AlienBlobDrawer(WIDTH, HEIGHT, NUM_COLORS),
+     new bzr.BzrDrawer(WIDTH, HEIGHT, NUM_COLORS),
+     new video.VideoDrawer(WIDTH, HEIGHT, NUM_COLORS, cam),
+     // new gradient.GradientDrawer(WIDTH, HEIGHT, NUM_COLORS),
+     new off.OffDrawer(WIDTH, HEIGHT, NUM_COLORS)
+    ];
 
 var availableDrawers = {};  // drawers that can be selected from the UI
 for (var i = 0; i < allDrawers.length; i++) {
-  if ((HEIGHT == 1 && allDrawers[i].type().indexOf("1D") > -1) ||
-      (HEIGHT > 1 && allDrawers[i].type().indexOf("2D") > -1)) {
-    availableDrawers[allDrawers[i].name] = allDrawers[i];
-  }
+    if ((HEIGHT == 1 && allDrawers[i].type().indexOf("1D") > -1) ||
+	(HEIGHT > 1 && allDrawers[i].type().indexOf("2D") > -1)) {
+	availableDrawers[allDrawers[i].name] = allDrawers[i];
+    }
 }
 
 //// Start the patterns ////
 var paletteMgr = new palette.PaletteManager(allBaseColors, NUM_COLORS);
 var leds = new leds.LEDs(WIDTH, HEIGHT, DEPTH, device, layoutLeftToRight, UPDATE_IMAGE_INTERVAL);
 var control = new controller.Controller(leds, paletteMgr, availableDrawers, 
-  START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
+					START_DRAWER, DRAWER_CHANGE_INTERVAL, cam, ENABLE_AUDIO);
 
-var func = function() { control.loop(); };
+function func() { control.loop(); };
 setInterval(func, 1000 / FPS);
 
 //// Start the http server ///
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/image', function(req, res) {
-  var image = "data:image/png;base64," + leds.pngData.toString('base64');
-  //leds.pngData = '';
-  res.send(image);
+    var image = "data:image/png;base64," + leds.pngData.toString('base64');
+    //leds.pngData = '';
+    res.send(image);
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 http.listen(8080, function(){
-  console.log('listening on *:8080');
+    console.log('listening on *:8080');
 });
 
 
 
 //// Handle the websockets connection to the client ////
 io.sockets.on('connection', function (socket) {
-  // get the allowed programs
-  socket.on('get drawers', function (data, fn) {
-    console.log('get drawers: ' + JSON.stringify(data));
-    var settings = control.getSettings();
-    fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
-        allNames: Object.keys(availableDrawers)});
-  });
-
-  // set the running program, return it's settings
-  // plus the palette
-  socket.on('set drawer', function (drawerName, fn) {
-    console.log('set drawer: ' + drawerName);
-    control.changeDrawer(availableDrawers[drawerName]);
-    var settings = control.getSettings();
-    fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
-  });
-
-  // update the settings on the server
-  socket.on('set settings', function (settingVals, fn) {
-    console.log('set settings: ' + JSON.stringify(settingVals));
-    control.setSettings(settingVals);
-    //fn();
-  });
-
-  // randomize the settings on the server
-  socket.on('randomize settings', function (data, fn) {
-    console.log('randomize settings: ' + data);
-    control.randomizeSettings();
-    fn(control.getSettings().values);
-  });
+    // get the allowed programs
+    socket.on('get drawers', function (data, fn) {
+	console.log('get drawers: ' + JSON.stringify(data));
+	var settings = control.getSettings();
+	fn({active: {name: control.currDrawer.name, ranges: settings.ranges, values: settings.values},
+            allNames: Object.keys(availableDrawers)});
+    });
+    
+    // set the running program, return it's settings
+    // plus the palette
+    socket.on('set drawer', function (drawerName, fn) {
+	console.log('set drawer: ' + drawerName);
+	control.changeDrawer(availableDrawers[drawerName]);
+	var settings = control.getSettings();
+	fn({drawer: drawerName, ranges: settings.ranges, values: settings.values});
+    });
+    
+    // update the settings on the server
+    socket.on('set settings', function (settingVals, fn) {
+	console.log('set settings: ' + JSON.stringify(settingVals));
+	control.setSettings(settingVals);
+	//fn();
+    });
+    
+    // randomize the settings on the server
+    socket.on('randomize settings', function (data, fn) {
+	console.log('randomize settings: ' + data);
+	control.randomizeSettings();
+	fn(control.getSettings().values);
+    });
 });
 
 function cleanup() {

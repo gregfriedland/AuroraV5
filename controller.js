@@ -1,7 +1,7 @@
 var extend = require('extend');
 var facedetector = require('./facedetector.js');
 
-var FACEDETECTION_FPS = 10
+var FACEDETECTION_FPS = 0
 var FACEDETECTION_HISTORY_SIZE = 3;
 var FACEDETECTION_SIGNAL_THRESHOLD = 1;
 var AUDIO_LEVEL_HISTORY = 30;
@@ -18,13 +18,17 @@ function Controller(leds, paletteMgr, drawers, startDrawerName, drawerChangeInte
   this.drawerChange = {interval: drawerChangeInterval, lastChange: Date.now()};
   this.cam = cam;
 
+  this.drawerNames = Object.keys(this.drawers).filter(
+        function(name) { return name != "Off" && name != "Video"; });
+
   if (enableAudio) {
     var coreAudio = require("node-core-audio");
     audioEngine = coreAudio.createNewAudioEngine();
     audioEngine.setOptions({sampleRate: 11025, framesPerBuffer: 512, inputChannels: 1, outputChannels: 1})
 
     var instance = this;
-    audioEngine.addAudioCallback( function(buffer) { return instance.processAudio(buffer); });
+    var func = function(buffer) { return instance.processAudio(buffer); };
+    audioEngine.addAudioCallback(func);
     this.audioLevel = 0;
   }
 
@@ -50,16 +54,19 @@ Controller.prototype.processAudio = function(buffer) {
 Controller.prototype.loop = function() {
   if (Date.now() - this.drawerChange.lastChange > this.drawerChange.interval &&
     this.currDrawer.name != "Off") {
-    // change the drawer every so often to keep things interesting except if we're on
-    // the 'video' drawer in which case only change the settings
+    // change the drawer every so often (but not to off or video) to keep things interesting 
+    // except if we're on the 'video' drawer in which case only change the settings
     if (this.currDrawer.name != "Video") {
-      var drawerNames = Object.keys(this.drawers).filter(
-        function(name) { return name != "Off" && name != "Video"; });
-      var randDrawerName = drawerNames[randomInt(0, drawerNames.length)];
-      this.changeDrawer(this.drawers[randDrawerName]);
+	var drawerNames = [];
+	for (var name in this.drawers) {
+	    if (name != "Off" && name != "Video")
+		drawerNames.push(name);
+	}
+
+        var randDrawerName = drawerNames[randomInt(0, drawerNames.length)];
+	this.changeDrawer(this.drawers[randDrawerName]);
     } else {
       console.log('randomizing drawer settings');
-      //global.gc();
     }
 
     this.randomizeSettings();
